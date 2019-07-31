@@ -102,7 +102,7 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt,
   group_name_ = opt.group_name_;
   robot_description_ = opt.robot_description_;
   robot_model_ = opt.robot_model_ ? opt.robot_model_ : getSharedRobotModel(opt.robot_description_);
-  if (!getRobotModel())
+  if (!robot_model_)
   {
     std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
       "parameter server.";
@@ -110,16 +110,16 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt,
     throw std::runtime_error(error);
   }
 
-  if (!getRobotModel()->hasJointModelGroup(opt.group_name_))
+  if (!robot_model_->hasJointModelGroup(opt.group_name_))
   {
     std::string error = "Group '" + opt.group_name_ + "' was not found.";
     ROS_FATAL_STREAM_NAMED("move_group_interface", error);
     throw std::runtime_error(error);
   }
 
-  joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name_);
+  joint_model_group_ = robot_model_->getJointModelGroup(opt.group_name_);
 
-  joint_state_target_.reset(new robot_state::RobotState(getRobotModel()));
+  joint_state_target_.reset(new robot_state::RobotState(robot_model_));
   joint_state_target_->setToDefaultValues();
   active_target_ = JOINT;
   can_look_ = false;
@@ -136,7 +136,7 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt,
 
   if (joint_model_group_->isChain())
     end_effector_link_ = joint_model_group_->getLinkModelNames().back();
-  pose_reference_frame_ = getRobotModel()->getModelFrame();
+  pose_reference_frame_ = robot_model_->getModelFrame();
 
   trajectory_event_publisher_ = node_handle_.advertise<std_msgs::String>(trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC, 1, false);
   attached_object_publisher_ = node_handle_.advertise<moveit_msgs::AttachedCollisionObject>(planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1, false);
@@ -191,6 +191,7 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(
 
 moveit::planning_interface::MoveItCpp::~MoveItCpp()
 {
+  clearContents();
 }
 
 moveit::planning_interface::MoveItCpp::MoveItCpp(MoveItCpp&& other)
@@ -265,8 +266,8 @@ const std::string& moveit::planning_interface::MoveItCpp::getName() const
 
 const std::vector<std::string> moveit::planning_interface::MoveItCpp::getNamedTargets()
 {
-  const robot_model::RobotModelConstPtr& robot = getRobotModel();
-  const std::string& group = getName();
+  const robot_model::RobotModelConstPtr& robot = robot_model_;
+  const std::string& group = group_name_;
   const robot_model::JointModelGroup* joint_group = robot->getJointModelGroup(group);
 
   if (joint_group)
@@ -600,7 +601,7 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
     moveit_msgs::PlaceLocation location;
     location.pre_place_approach.direction.vector.z = -1.0;
     location.post_place_retreat.direction.vector.x = -1.0;
-    location.pre_place_approach.direction.header.frame_id = getRobotModel()->getModelFrame();
+    location.pre_place_approach.direction.header.frame_id = robot_model_->getModelFrame();
     location.post_place_retreat.direction.header.frame_id = end_effector_link_;
 
     location.pre_place_approach.min_distance = 0.1;
@@ -904,9 +905,9 @@ const std::string& moveit::planning_interface::MoveItCpp::getEndEffector() const
   if (!end_effector_link_.empty())
   {
     const std::vector<std::string>& possible_eefs =
-      getRobotModel()->getJointModelGroup(group_name_)->getAttachedEndEffectorNames();
+      robot_model_->getJointModelGroup(group_name_)->getAttachedEndEffectorNames();
     for (const std::string& possible_eef : possible_eefs)
-      if (getRobotModel()->getEndEffector(possible_eef)->hasLinkModel(end_effector_link_))
+      if (robot_model_->getEndEffector(possible_eef)->hasLinkModel(end_effector_link_))
         return possible_eef;
   }
   static std::string empty;
@@ -1220,7 +1221,7 @@ std::vector<double> moveit::planning_interface::MoveItCpp::getCurrentJointValues
   robot_state::RobotStatePtr current_state;
   std::vector<double> values;
   if (getCurrentState(current_state, 1.0))
-    current_state->copyJointGroupPositions(getName(), values);
+    current_state->copyJointGroupPositions(group_name_, values);
   return values;
 }
 
@@ -1434,7 +1435,7 @@ void moveit::planning_interface::MoveItCpp::setConstraintsDatabase(const std::st
 void moveit::planning_interface::MoveItCpp::setWorkspace(double minx, double miny, double minz, double maxx,
                                                                   double maxy, double maxz)
 {
-  workspace_parameters_.header.frame_id = getRobotModel()->getModelFrame();
+  workspace_parameters_.header.frame_id = robot_model_->getModelFrame();
   workspace_parameters_.header.stamp = ros::Time::now();
   workspace_parameters_.min_corner.x = minx;
   workspace_parameters_.min_corner.y = miny;
@@ -1875,7 +1876,8 @@ void moveit::planning_interface::MoveItCpp::initializeConstraintsStorageThread(c
 
 void moveit::planning_interface::MoveItCpp::clearContents()
 {
-  //TODO figure out what else needs to be removed/cleaned.
+  //  TODO Instead of setting to nullptrs actually delete
+  //  TODO Set values to "default values"
   group_name_.clear();
   robot_description_.clear();
   //node_handle_;
