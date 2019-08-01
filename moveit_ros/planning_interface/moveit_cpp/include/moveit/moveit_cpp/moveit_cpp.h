@@ -98,7 +98,6 @@ namespace moveit
 /** \brief Simple interface to MoveIt! components */
 namespace planning_interface
 {
-
 class MoveItErrorCode : public moveit_msgs::MoveItErrorCodes
 {
 public:
@@ -144,7 +143,7 @@ public:
   /** \brief Specification of options to use when constructing the MoveItCpp class */
   struct Options
   {
-    Options(const std::string& group_name="FAKE", const std::string& desc = ROBOT_DESCRIPTION,
+    Options(const std::string& group_name = "FAKE", const std::string& desc = ROBOT_DESCRIPTION,
             const ros::NodeHandle& node_handle = ros::NodeHandle())
       : group_name_(group_name), robot_description_(desc), node_handle_(node_handle)
     {
@@ -187,9 +186,8 @@ public:
                         one will be constructed internally along with an internal TF2_ROS TransformListener
       \param wait_for_servers. Timeout for connecting to action servers. Zero time means unlimited waiting.
     */
-  MoveItCpp(const Options& opt,
-                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const ros::WallDuration& wait_for_servers = ros::WallDuration());
+  MoveItCpp(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
+            const ros::WallDuration& wait_for_servers = ros::WallDuration());
   /**
       \brief Construct a client for the MoveGroup action for a particular \e group.
 
@@ -198,8 +196,8 @@ public:
       \param wait_for_servers. Timeout for connecting to action servers. Zero time means unlimited waiting.
     */
   MoveItCpp(const std::string& group,
-                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const ros::WallDuration& wait_for_servers = ros::WallDuration());
+            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
+            const ros::WallDuration& wait_for_servers = ros::WallDuration());
 
   ~MoveItCpp();
 
@@ -1009,7 +1007,7 @@ private:
   robot_state::RobotStatePtr getStartState();
   bool hasPoseTarget(const std::string& end_effector_link) const;
   void clearContents();
-  //void initializeConstraintsStorage(const std::string& host, unsigned int port);
+  // void initializeConstraintsStorage(const std::string& host, unsigned int port);
 
   // context contents
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;

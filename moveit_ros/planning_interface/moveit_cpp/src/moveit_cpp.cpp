@@ -73,9 +73,8 @@ namespace moveit
 {
 namespace planning_interface
 {
-
 const std::string MoveItCpp::ROBOT_DESCRIPTION =
-  "robot_description";  // name of the robot description (a param name, so it can be changed externally)
+    "robot_description";  // name of the robot description (a param name, so it can be changed externally)
 
 const std::string GRASP_PLANNING_SERVICE_NAME = "plan_grasps";  // name of the service that can be used to plan grasps
 }  //  planning_interface
@@ -94,8 +93,7 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const std::string& group,
 {
 }
 
-moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt,
-                                                 const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                                  const ros::WallDuration& wait_for_servers)
   : node_handle_(opt.node_handle_), tf_buffer_(tf_buffer)
 {
@@ -105,7 +103,7 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt,
   if (!robot_model_)
   {
     std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
-      "parameter server.";
+                        "parameter server.";
     ROS_FATAL_STREAM_NAMED("move_group_interface", error);
     throw std::runtime_error(error);
   }
@@ -138,8 +136,10 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt,
     end_effector_link_ = joint_model_group_->getLinkModelNames().back();
   pose_reference_frame_ = robot_model_->getModelFrame();
 
-  trajectory_event_publisher_ = node_handle_.advertise<std_msgs::String>(trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC, 1, false);
-  attached_object_publisher_ = node_handle_.advertise<moveit_msgs::AttachedCollisionObject>(planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1, false);
+  trajectory_event_publisher_ = node_handle_.advertise<std_msgs::String>(
+      trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC, 1, false);
+  attached_object_publisher_ = node_handle_.advertise<moveit_msgs::AttachedCollisionObject>(
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1, false);
 
   current_state_monitor_ = getSharedStateMonitor(robot_model_, tf_buffer_, node_handle_);
 
@@ -149,42 +149,41 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt,
   double allotted_time = wait_for_servers.toSec();
 
   move_action_client_.reset(
-                            new actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction>(node_handle_, move_group::MOVE_ACTION, false));
+      new actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction>(node_handle_, move_group::MOVE_ACTION, false));
   waitForAction(move_action_client_, move_group::MOVE_ACTION, timeout_for_servers, allotted_time);
 
   pick_action_client_.reset(
-                            new actionlib::SimpleActionClient<moveit_msgs::PickupAction>(node_handle_, move_group::PICKUP_ACTION, false));
+      new actionlib::SimpleActionClient<moveit_msgs::PickupAction>(node_handle_, move_group::PICKUP_ACTION, false));
   waitForAction(pick_action_client_, move_group::PICKUP_ACTION, timeout_for_servers, allotted_time);
 
   place_action_client_.reset(
-                             new actionlib::SimpleActionClient<moveit_msgs::PlaceAction>(node_handle_, move_group::PLACE_ACTION, false));
+      new actionlib::SimpleActionClient<moveit_msgs::PlaceAction>(node_handle_, move_group::PLACE_ACTION, false));
   waitForAction(place_action_client_, move_group::PLACE_ACTION, timeout_for_servers, allotted_time);
 
   execute_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction>(
-                                                                                                       node_handle_, move_group::EXECUTE_ACTION_NAME, false));
+      node_handle_, move_group::EXECUTE_ACTION_NAME, false));
   waitForAction(execute_action_client_, move_group::EXECUTE_ACTION_NAME, timeout_for_servers, allotted_time);
 
   query_service_ =
-    node_handle_.serviceClient<moveit_msgs::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
+      node_handle_.serviceClient<moveit_msgs::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
   get_params_service_ =
-    node_handle_.serviceClient<moveit_msgs::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
+      node_handle_.serviceClient<moveit_msgs::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
   set_params_service_ =
-    node_handle_.serviceClient<moveit_msgs::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
+      node_handle_.serviceClient<moveit_msgs::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
 
   cartesian_path_service_ =
-    node_handle_.serviceClient<moveit_msgs::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
+      node_handle_.serviceClient<moveit_msgs::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
 
   plan_grasps_service_ = node_handle_.serviceClient<moveit_msgs::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
-  ROS_INFO_STREAM_NAMED("move_group_interface", "Ready to take commands for planning group " << opt.group_name_
-                        << ".");
+  ROS_INFO_STREAM_NAMED("move_group_interface", "Ready to take commands for planning group " << opt.group_name_ << ".");
   group_name_ = opt.group_name_;
   robot_description_ = opt.robot_description_;
 }
 
-moveit::planning_interface::MoveItCpp::MoveItCpp(
-    const moveit::planning_interface::MoveItCpp::Options& opt,
-    const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const ros::Duration& wait_for_servers)
+moveit::planning_interface::MoveItCpp::MoveItCpp(const moveit::planning_interface::MoveItCpp::Options& opt,
+                                                 const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+                                                 const ros::Duration& wait_for_servers)
   : MoveItCpp(opt, tf_buffer, ros::WallDuration(wait_for_servers.toSec()))
 {
 }
@@ -199,8 +198,7 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(MoveItCpp&& other)
   other.clearContents();
 }
 
-moveit::planning_interface::MoveItCpp& moveit::planning_interface::MoveItCpp::
-operator=(MoveItCpp&& other)
+moveit::planning_interface::MoveItCpp& moveit::planning_interface::MoveItCpp::operator=(MoveItCpp&& other)
 {
   if (this != &other)
   {
@@ -289,8 +287,7 @@ const ros::NodeHandle& moveit::planning_interface::MoveItCpp::getNodeHandle() co
   return node_handle_;
 }
 
-bool moveit::planning_interface::MoveItCpp::getInterfaceDescription(
-    moveit_msgs::PlannerInterfaceDescription& desc)
+bool moveit::planning_interface::MoveItCpp::getInterfaceDescription(moveit_msgs::PlannerInterfaceDescription& desc)
 {
   moveit_msgs::QueryPlannerInterfaces::Request req;
   moveit_msgs::QueryPlannerInterfaces::Response res;
@@ -303,8 +300,8 @@ bool moveit::planning_interface::MoveItCpp::getInterfaceDescription(
   return false;
 }
 
-std::map<std::string, std::string> moveit::planning_interface::MoveItCpp::getPlannerParams(
-    const std::string& planner_id, const std::string& group)
+std::map<std::string, std::string>
+moveit::planning_interface::MoveItCpp::getPlannerParams(const std::string& planner_id, const std::string& group)
 {
   moveit_msgs::GetPlannerParams::Request req;
   moveit_msgs::GetPlannerParams::Response res;
@@ -319,10 +316,9 @@ std::map<std::string, std::string> moveit::planning_interface::MoveItCpp::getPla
   return result;
 }
 
-void moveit::planning_interface::MoveItCpp::setPlannerParams(const std::string& planner_id,
-                                                                      const std::string& group,
-                                                                      const std::map<std::string, std::string>& params,
-                                                                      bool replace)
+void moveit::planning_interface::MoveItCpp::setPlannerParams(const std::string& planner_id, const std::string& group,
+                                                             const std::map<std::string, std::string>& params,
+                                                             bool replace)
 {
   moveit_msgs::SetPlannerParams::Request req;
   moveit_msgs::SetPlannerParams::Response res;
@@ -370,8 +366,7 @@ void moveit::planning_interface::MoveItCpp::setMaxVelocityScalingFactor(double m
   max_velocity_scaling_factor_ = max_velocity_scaling_factor;
 }
 
-void moveit::planning_interface::MoveItCpp::setMaxAccelerationScalingFactor(
-    double max_acceleration_scaling_factor)
+void moveit::planning_interface::MoveItCpp::setMaxAccelerationScalingFactor(double max_acceleration_scaling_factor)
 {
   max_acceleration_scaling_factor_ = max_acceleration_scaling_factor;
 }
@@ -392,8 +387,7 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   return move(true);
 }
 
-moveit::planning_interface::MoveItErrorCode
-moveit::planning_interface::MoveItCpp::asyncExecute(const Plan& plan)
+moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCpp::asyncExecute(const Plan& plan)
 {
   return execute(plan, false);
 }
@@ -437,19 +431,20 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   else
   {
     ROS_WARN_STREAM_NAMED("move_group_interface", "Fail: " << move_action_client_->getState().toString() << ": "
-                          << move_action_client_->getState().getText());
+                                                           << move_action_client_->getState().getText());
     return MoveItErrorCode(move_action_client_->getResult()->error_code);
   }
 }
 
-moveit::planning_interface::MoveItErrorCode
-moveit::planning_interface::MoveItCpp::pick(const std::string& object, bool plan_only)
+moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCpp::pick(const std::string& object,
+                                                                                        bool plan_only)
 {
   return pick(object, std::vector<moveit_msgs::Grasp>(), plan_only);
 }
 
-moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCpp::pick(
-    const std::string& object, const moveit_msgs::Grasp& grasp, bool plan_only)
+moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCpp::pick(const std::string& object,
+                                                                                        const moveit_msgs::Grasp& grasp,
+                                                                                        bool plan_only)
 {
   return pick(object, std::vector<moveit_msgs::Grasp>(1, grasp), plan_only);
 }
@@ -489,7 +484,7 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   else
   {
     ROS_WARN_STREAM_NAMED("move_group_interface", "Fail: " << pick_action_client_->getState().toString() << ": "
-                          << pick_action_client_->getState().getText());
+                                                           << pick_action_client_->getState().getText());
     return MoveItErrorCode(pick_action_client_->getResult()->error_code);
   }
 }
@@ -508,22 +503,22 @@ moveit::planning_interface::MoveItCpp::planGraspsAndPick(const std::string& obje
   if (objects.empty())
   {
     ROS_ERROR_STREAM_NAMED("move_group_interface", "Asked for grasps for the object '"
-                           << object << "', but the object could not be found");
+                                                       << object << "', but the object could not be found");
     return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::INVALID_OBJECT_NAME);
   }
 
   return planGraspsAndPick(objects[object], plan_only);
 }
 
-moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCpp::planGraspsAndPick(
-    const moveit_msgs::CollisionObject& object, bool plan_only)
+moveit::planning_interface::MoveItErrorCode
+moveit::planning_interface::MoveItCpp::planGraspsAndPick(const moveit_msgs::CollisionObject& object, bool plan_only)
 {
   if (!plan_grasps_service_)
   {
     ROS_ERROR_STREAM_NAMED("move_group_interface", "Grasp planning service '"
-                           << GRASP_PLANNING_SERVICE_NAME
-                           << "' is not available."
-                           " This has to be implemented and started seperatly.");
+                                                       << GRASP_PLANNING_SERVICE_NAME
+                                                       << "' is not available."
+                                                          " This has to be implemented and started seperatly.");
     return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
   }
 
@@ -545,8 +540,8 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   return pick(object.id, response.grasps, plan_only);
 }
 
-moveit::planning_interface::MoveItErrorCode
-moveit::planning_interface::MoveItCpp::place(const std::string& object, bool plan_only)
+moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCpp::place(const std::string& object,
+                                                                                         bool plan_only)
 {
   return place(object, std::vector<moveit_msgs::PlaceLocation>(), plan_only);
 }
@@ -587,7 +582,7 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   else
   {
     ROS_WARN_STREAM_NAMED("move_group_interface", "Fail: " << place_action_client_->getState().toString() << ": "
-                          << place_action_client_->getState().getText());
+                                                           << place_action_client_->getState().getText());
     return MoveItErrorCode(place_action_client_->getResult()->error_code);
   }
 }
@@ -624,19 +619,23 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   return place(object, std::vector<geometry_msgs::PoseStamped>(1, pose), plan_only);
 }
 
-double moveit::planning_interface::MoveItCpp::computeCartesianPath(
-    const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-    moveit_msgs::RobotTrajectory& trajectory, bool avoid_collisions, moveit_msgs::MoveItErrorCodes* error_code)
+double moveit::planning_interface::MoveItCpp::computeCartesianPath(const std::vector<geometry_msgs::Pose>& waypoints,
+                                                                   double eef_step, double jump_threshold,
+                                                                   moveit_msgs::RobotTrajectory& trajectory,
+                                                                   bool avoid_collisions,
+                                                                   moveit_msgs::MoveItErrorCodes* error_code)
 {
   moveit_msgs::Constraints path_constraints_tmp;
   return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints_tmp, avoid_collisions,
                               error_code);
 }
 
-double moveit::planning_interface::MoveItCpp::computeCartesianPath(
-    const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-    moveit_msgs::RobotTrajectory& trajectory, const moveit_msgs::Constraints& path_constraints, bool avoid_collisions,
-    moveit_msgs::MoveItErrorCodes* error_code)
+double moveit::planning_interface::MoveItCpp::computeCartesianPath(const std::vector<geometry_msgs::Pose>& waypoints,
+                                                                   double eef_step, double jump_threshold,
+                                                                   moveit_msgs::RobotTrajectory& trajectory,
+                                                                   const moveit_msgs::Constraints& path_constraints,
+                                                                   bool avoid_collisions,
+                                                                   moveit_msgs::MoveItErrorCodes* error_code)
 {
   moveit_msgs::GetCartesianPath::Request req;
   moveit_msgs::GetCartesianPath::Response res;
@@ -666,9 +665,9 @@ double moveit::planning_interface::MoveItCpp::computeCartesianPath(
       return res.fraction;
     }
     else
-      {
+    {
       return -1.0;
-      }
+    }
   }
   else
   {
@@ -708,7 +707,7 @@ void moveit::planning_interface::MoveItCpp::setStartStateToCurrentState()
 void moveit::planning_interface::MoveItCpp::setRandomTarget()
 {
   joint_state_target_->setToRandomPositions();
-  active_target_=JOINT;
+  active_target_ = JOINT;
 }
 
 const std::vector<std::string>& moveit::planning_interface::MoveItCpp::getJointNames()
@@ -721,8 +720,7 @@ const std::vector<std::string>& moveit::planning_interface::MoveItCpp::getLinkNa
   return joint_model_group_->getLinkModelNames();
 }
 
-std::map<std::string, double>
-moveit::planning_interface::MoveItCpp::getNamedTargetValues(const std::string& name)
+std::map<std::string, double> moveit::planning_interface::MoveItCpp::getNamedTargetValues(const std::string& name)
 {
   std::map<std::string, std::vector<double> >::const_iterator it = remembered_joint_values_.find(name);
   std::map<std::string, double> positions;
@@ -761,8 +759,7 @@ bool moveit::planning_interface::MoveItCpp::setNamedTarget(const std::string& na
   }
 }
 
-void moveit::planning_interface::MoveItCpp::getJointValueTarget(
-    std::vector<double>& group_variable_values) const
+void moveit::planning_interface::MoveItCpp::getJointValueTarget(std::vector<double>& group_variable_values) const
 {
   joint_state_target_->copyJointGroupPositions(joint_model_group_, group_variable_values);
 }
@@ -776,16 +773,14 @@ bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const std::vecto
   return joint_state_target_->satisfiesBounds(joint_model_group_, goal_joint_tolerance_);
 }
 
-bool moveit::planning_interface::MoveItCpp::setJointValueTarget(
-    const std::map<std::string, double>& variable_values)
+bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const std::map<std::string, double>& variable_values)
 {
   const auto& allowed = joint_model_group_->getVariableNames();
   for (const auto& pair : variable_values)
   {
     if (std::find(allowed.begin(), allowed.end(), pair.first) == allowed.end())
     {
-      ROS_ERROR_STREAM("joint variable " << pair.first << " is not part of group "
-                                         << joint_model_group_->getName());
+      ROS_ERROR_STREAM("joint variable " << pair.first << " is not part of group " << joint_model_group_->getName());
       return false;
     }
   }
@@ -796,15 +791,14 @@ bool moveit::planning_interface::MoveItCpp::setJointValueTarget(
 }
 
 bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const std::vector<std::string>& variable_names,
-                                                                         const std::vector<double>& variable_values)
+                                                                const std::vector<double>& variable_values)
 {
   const auto& allowed = joint_model_group_->getVariableNames();
   for (const auto& variable_name : variable_names)
   {
     if (std::find(allowed.begin(), allowed.end(), variable_name) == allowed.end())
     {
-      ROS_ERROR_STREAM("joint variable " << variable_name << " is not part of group "
-                                         << joint_model_group_->getName());
+      ROS_ERROR_STREAM("joint variable " << variable_name << " is not part of group " << joint_model_group_->getName());
       return false;
     }
   }
@@ -828,7 +822,7 @@ bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const std::strin
 }
 
 bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const std::string& joint_name,
-                                                                         const std::vector<double>& values)
+                                                                const std::vector<double>& values)
 {
   active_target_ = JOINT;
   const robot_model::JointModel* jm = joint_model_group_->getJointModel(joint_name);
@@ -848,38 +842,38 @@ bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const sensor_msg
 }
 
 bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const geometry_msgs::Pose& eef_pose,
-                                                                         const std::string& end_effector_link)
+                                                                const std::string& end_effector_link)
 {
   return setJointValueTarget(eef_pose, end_effector_link, "", false);
 }
 
 bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const geometry_msgs::PoseStamped& eef_pose,
-                                                                         const std::string& end_effector_link)
+                                                                const std::string& end_effector_link)
 {
   return setJointValueTarget(eef_pose.pose, end_effector_link, eef_pose.header.frame_id, false);
 }
 
 bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const Eigen::Isometry3d& eef_pose,
-                                                                         const std::string& end_effector_link)
+                                                                const std::string& end_effector_link)
 {
   geometry_msgs::Pose msg = tf2::toMsg(eef_pose);
   return setJointValueTarget(msg, end_effector_link);
 }
 
-bool moveit::planning_interface::MoveItCpp::setApproximateJointValueTarget(
-    const geometry_msgs::Pose& eef_pose, const std::string& end_effector_link)
+bool moveit::planning_interface::MoveItCpp::setApproximateJointValueTarget(const geometry_msgs::Pose& eef_pose,
+                                                                           const std::string& end_effector_link)
 {
   return setJointValueTarget(eef_pose, end_effector_link, "", true);
 }
 
-bool moveit::planning_interface::MoveItCpp::setApproximateJointValueTarget(
-    const geometry_msgs::PoseStamped& eef_pose, const std::string& end_effector_link)
+bool moveit::planning_interface::MoveItCpp::setApproximateJointValueTarget(const geometry_msgs::PoseStamped& eef_pose,
+                                                                           const std::string& end_effector_link)
 {
   return setJointValueTarget(eef_pose.pose, end_effector_link, eef_pose.header.frame_id, true);
 }
 
-bool moveit::planning_interface::MoveItCpp::setApproximateJointValueTarget(
-    const Eigen::Isometry3d& eef_pose, const std::string& end_effector_link)
+bool moveit::planning_interface::MoveItCpp::setApproximateJointValueTarget(const Eigen::Isometry3d& eef_pose,
+                                                                           const std::string& end_effector_link)
 {
   geometry_msgs::Pose msg = tf2::toMsg(eef_pose);
   return setApproximateJointValueTarget(msg, end_effector_link);
@@ -905,7 +899,7 @@ const std::string& moveit::planning_interface::MoveItCpp::getEndEffector() const
   if (!end_effector_link_.empty())
   {
     const std::vector<std::string>& possible_eefs =
-      robot_model_->getJointModelGroup(group_name_)->getAttachedEndEffectorNames();
+        robot_model_->getJointModelGroup(group_name_)->getAttachedEndEffectorNames();
     for (const std::string& possible_eef : possible_eefs)
       if (robot_model_->getEndEffector(possible_eef)->hasLinkModel(end_effector_link_))
         return possible_eef;
@@ -942,7 +936,7 @@ void moveit::planning_interface::MoveItCpp::clearPoseTargets()
 }
 
 bool moveit::planning_interface::MoveItCpp::setPoseTarget(const Eigen::Isometry3d& pose,
-                                                                   const std::string& end_effector_link)
+                                                          const std::string& end_effector_link)
 {
   std::vector<geometry_msgs::PoseStamped> pose_msg(1);
   pose_msg[0].pose = tf2::toMsg(pose);
@@ -952,7 +946,7 @@ bool moveit::planning_interface::MoveItCpp::setPoseTarget(const Eigen::Isometry3
 }
 
 bool moveit::planning_interface::MoveItCpp::setPoseTarget(const geometry_msgs::Pose& target,
-                                                                   const std::string& end_effector_link)
+                                                          const std::string& end_effector_link)
 {
   std::vector<geometry_msgs::PoseStamped> pose_msg(1);
   pose_msg[0].pose = target;
@@ -962,14 +956,14 @@ bool moveit::planning_interface::MoveItCpp::setPoseTarget(const geometry_msgs::P
 }
 
 bool moveit::planning_interface::MoveItCpp::setPoseTarget(const geometry_msgs::PoseStamped& target,
-                                                                   const std::string& end_effector_link)
+                                                          const std::string& end_effector_link)
 {
   std::vector<geometry_msgs::PoseStamped> targets(1, target);
   return setPoseTargets(targets, end_effector_link);
 }
 
 bool moveit::planning_interface::MoveItCpp::setPoseTargets(const EigenSTL::vector_Isometry3d& target,
-                                                                    const std::string& end_effector_link)
+                                                           const std::string& end_effector_link)
 {
   std::vector<geometry_msgs::PoseStamped> pose_out(target.size());
   ros::Time tm = ros::Time::now();
@@ -984,7 +978,7 @@ bool moveit::planning_interface::MoveItCpp::setPoseTargets(const EigenSTL::vecto
 }
 
 bool moveit::planning_interface::MoveItCpp::setPoseTargets(const std::vector<geometry_msgs::Pose>& target,
-                                                                    const std::string& end_effector_link)
+                                                           const std::string& end_effector_link)
 {
   std::vector<geometry_msgs::PoseStamped> target_stamped(target.size());
   ros::Time tm = ros::Time::now();
@@ -998,7 +992,8 @@ bool moveit::planning_interface::MoveItCpp::setPoseTargets(const std::vector<geo
   return setPoseTargets(target_stamped, end_effector_link);
 }
 
-bool moveit::planning_interface::MoveItCpp::setPoseTargets(const std::vector<geometry_msgs::PoseStamped>& target, const std::string& end_effector_link)
+bool moveit::planning_interface::MoveItCpp::setPoseTargets(const std::vector<geometry_msgs::PoseStamped>& target,
+                                                           const std::string& end_effector_link)
 {
   if (target.empty())
   {
@@ -1026,7 +1021,8 @@ bool moveit::planning_interface::MoveItCpp::setPoseTargets(const std::vector<geo
   }
 }
 
-const geometry_msgs::PoseStamped& moveit::planning_interface::MoveItCpp::getPoseTarget(const std::string& end_effector_link) const
+const geometry_msgs::PoseStamped&
+moveit::planning_interface::MoveItCpp::getPoseTarget(const std::string& end_effector_link) const
 {
   const std::string& eef = end_effector_link.empty() ? end_effector_link_ : end_effector_link;
 
@@ -1042,7 +1038,8 @@ const geometry_msgs::PoseStamped& moveit::planning_interface::MoveItCpp::getPose
   return UNKNOWN;
 }
 
-const std::vector<geometry_msgs::PoseStamped>& moveit::planning_interface::MoveItCpp::getPoseTargets(const std::string& end_effector_link) const
+const std::vector<geometry_msgs::PoseStamped>&
+moveit::planning_interface::MoveItCpp::getPoseTargets(const std::string& end_effector_link) const
 {
   const std::string& eef = end_effector_link.empty() ? end_effector_link_ : end_effector_link;
 
@@ -1073,7 +1070,7 @@ inline void transformPose(const tf2_ros::Buffer& tf_buffer, const std::string& d
 }  // namespace
 
 bool moveit::planning_interface::MoveItCpp::setPositionTarget(double x, double y, double z,
-                                                                       const std::string& end_effector_link)
+                                                              const std::string& end_effector_link)
 {
   geometry_msgs::PoseStamped target;
   if (hasPoseTarget(end_effector_link))
@@ -1099,7 +1096,7 @@ bool moveit::planning_interface::MoveItCpp::setPositionTarget(double x, double y
 }
 
 bool moveit::planning_interface::MoveItCpp::setRPYTarget(double r, double p, double y,
-                                                                  const std::string& end_effector_link)
+                                                         const std::string& end_effector_link)
 {
   geometry_msgs::PoseStamped target;
   if (hasPoseTarget(end_effector_link))
@@ -1123,7 +1120,7 @@ bool moveit::planning_interface::MoveItCpp::setRPYTarget(double r, double p, dou
 }
 
 bool moveit::planning_interface::MoveItCpp::setOrientationTarget(double x, double y, double z, double w,
-                                                                          const std::string& end_effector_link)
+                                                                 const std::string& end_effector_link)
 {
   geometry_msgs::PoseStamped target;
   if (hasPoseTarget(end_effector_link))
@@ -1232,8 +1229,7 @@ std::vector<double> moveit::planning_interface::MoveItCpp::getRandomJointValues(
   return r;
 }
 
-geometry_msgs::PoseStamped
-moveit::planning_interface::MoveItCpp::getRandomPose(const std::string& end_effector_link)
+geometry_msgs::PoseStamped moveit::planning_interface::MoveItCpp::getRandomPose(const std::string& end_effector_link)
 {
   const std::string& eef = end_effector_link.empty() ? getEndEffectorLink() : end_effector_link;
   Eigen::Isometry3d pose;
@@ -1258,8 +1254,7 @@ moveit::planning_interface::MoveItCpp::getRandomPose(const std::string& end_effe
   return pose_msg;
 }
 
-geometry_msgs::PoseStamped
-moveit::planning_interface::MoveItCpp::getCurrentPose(const std::string& end_effector_link)
+geometry_msgs::PoseStamped moveit::planning_interface::MoveItCpp::getCurrentPose(const std::string& end_effector_link)
 {
   const std::string& eef = end_effector_link.empty() ? getEndEffectorLink() : end_effector_link;
   Eigen::Isometry3d pose;
@@ -1333,7 +1328,7 @@ robot_state::RobotStatePtr moveit::planning_interface::MoveItCpp::getCurrentStat
 }
 
 void moveit::planning_interface::MoveItCpp::rememberJointValues(const std::string& name,
-                                                                         const std::vector<double>& values)
+                                                                const std::vector<double>& values)
 {
   remembered_joint_values_[name] = values;
 }
@@ -1429,11 +1424,12 @@ void moveit::planning_interface::MoveItCpp::setConstraintsDatabase(const std::st
   initializing_constraints_ = true;
   if (constraints_init_thread_)
     constraints_init_thread_->join();
-  constraints_init_thread_.reset(new boost::thread(boost::bind(&MoveItCpp::initializeConstraintsStorageThread, this, host, port)));
+  constraints_init_thread_.reset(
+      new boost::thread(boost::bind(&MoveItCpp::initializeConstraintsStorageThread, this, host, port)));
 }
 
 void moveit::planning_interface::MoveItCpp::setWorkspace(double minx, double miny, double minz, double maxx,
-                                                                  double maxy, double maxz)
+                                                         double maxy, double maxz)
 {
   workspace_parameters_.header.frame_id = robot_model_->getModelFrame();
   workspace_parameters_.header.stamp = ros::Time::now();
@@ -1479,7 +1475,7 @@ bool moveit::planning_interface::MoveItCpp::attachObject(const std::string& obje
 }
 
 bool moveit::planning_interface::MoveItCpp::attachObject(const std::string& object, const std::string& link,
-                                                                  const std::vector<std::string>& touch_links)
+                                                         const std::vector<std::string>& touch_links)
 {
   std::string l = link.empty() ? getEndEffectorLink() : link;
   if (l.empty())
@@ -1529,8 +1525,7 @@ bool moveit::planning_interface::MoveItCpp::detachObject(const std::string& name
   return true;
 }
 
-void moveit::planning_interface::MoveItCpp::constructMotionPlanRequest(
-    moveit_msgs::MotionPlanRequest& request)
+void moveit::planning_interface::MoveItCpp::constructMotionPlanRequest(moveit_msgs::MotionPlanRequest& request)
 {
   request.group_name = group_name_;
   request.num_planning_attempts = num_planning_attempts_;
@@ -1549,13 +1544,14 @@ void moveit::planning_interface::MoveItCpp::constructMotionPlanRequest(
   {
     request.goal_constraints.resize(1);
     request.goal_constraints[0] = kinematic_constraints::constructGoalConstraints(
-                                                                                  getTargetRobotState(), joint_model_group_, goal_joint_tolerance_);
+        getTargetRobotState(), joint_model_group_, goal_joint_tolerance_);
   }
   else if (active_target_ == POSE || active_target_ == POSITION || active_target_ == ORIENTATION)
   {
     // find out how many goals are specified
     std::size_t goal_count = 0;
-    for (std::map<std::string, std::vector<geometry_msgs::PoseStamped> >::const_iterator it = pose_targets_.begin(); it != pose_targets_.end(); ++it)
+    for (std::map<std::string, std::vector<geometry_msgs::PoseStamped> >::const_iterator it = pose_targets_.begin();
+         it != pose_targets_.end(); ++it)
       goal_count = std::max(goal_count, it->second.size());
 
     // start filling the goals;
@@ -1564,31 +1560,33 @@ void moveit::planning_interface::MoveItCpp::constructMotionPlanRequest(
     // to reach the goal that corresponds to the goals of the other end effectors
     request.goal_constraints.resize(goal_count);
 
-    for (std::map<std::string, std::vector<geometry_msgs::PoseStamped> >::const_iterator it = pose_targets_.begin(); it != pose_targets_.end(); ++it)
+    for (std::map<std::string, std::vector<geometry_msgs::PoseStamped> >::const_iterator it = pose_targets_.begin();
+         it != pose_targets_.end(); ++it)
+    {
+      for (std::size_t i = 0; i < it->second.size(); ++i)
       {
-        for (std::size_t i = 0; i < it->second.size(); ++i)
-        {
-          moveit_msgs::Constraints c = kinematic_constraints::constructGoalConstraints(
-              it->first, it->second[i], goal_position_tolerance_, goal_orientation_tolerance_);
-          if (active_target_ == ORIENTATION)
-            c.position_constraints.clear();
-          if (active_target_ == POSITION)
-            c.orientation_constraints.clear();
-          request.goal_constraints[i] = kinematic_constraints::mergeConstraints(request.goal_constraints[i], c);
-        }
+        moveit_msgs::Constraints c = kinematic_constraints::constructGoalConstraints(
+            it->first, it->second[i], goal_position_tolerance_, goal_orientation_tolerance_);
+        if (active_target_ == ORIENTATION)
+          c.position_constraints.clear();
+        if (active_target_ == POSITION)
+          c.orientation_constraints.clear();
+        request.goal_constraints[i] = kinematic_constraints::mergeConstraints(request.goal_constraints[i], c);
       }
     }
-    else
-      ROS_ERROR_NAMED("move_group_interface", "Unable to construct MotionPlanRequest representation");
+  }
+  else
+    ROS_ERROR_NAMED("move_group_interface", "Unable to construct MotionPlanRequest representation");
 
-    if (path_constraints_)
-      request.path_constraints = *path_constraints_;
-    if (trajectory_constraints_)
-      request.trajectory_constraints = *trajectory_constraints_;
+  if (path_constraints_)
+    request.path_constraints = *path_constraints_;
+  if (trajectory_constraints_)
+    request.trajectory_constraints = *trajectory_constraints_;
 }
 
 template <typename T>
-void moveit::planning_interface::MoveItCpp::waitForAction(const T& action, const std::string& name, const ros::WallTime& timeout, double allotted_time)
+void moveit::planning_interface::MoveItCpp::waitForAction(const T& action, const std::string& name,
+                                                          const ros::WallTime& timeout, double allotted_time)
 {
   ROS_DEBUG_NAMED("move_group_interface", "Waiting for move_group action server (%s)...", name.c_str());
 
@@ -1607,7 +1605,7 @@ void moveit::planning_interface::MoveItCpp::waitForAction(const T& action, const
       else  // in case of nodelets and specific callback queue implementations
       {
         ROS_WARN_ONCE_NAMED("move_group_interface", "Non-default CallbackQueue: Waiting for external queue "
-                            "handling.");
+                                                    "handling.");
       }
     }
   }
@@ -1625,7 +1623,7 @@ void moveit::planning_interface::MoveItCpp::waitForAction(const T& action, const
       else  // in case of nodelets and specific callback queue implementations
       {
         ROS_WARN_ONCE_NAMED("move_group_interface", "Non-default CallbackQueue: Waiting for external queue "
-                            "handling.");
+                                                    "handling.");
       }
     }
   }
@@ -1685,17 +1683,15 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   else
   {
     ROS_INFO_STREAM_NAMED("move_group_interface", move_action_client_->getState().toString()
-                          << ": " << move_action_client_->getState().getText());
+                                                      << ": " << move_action_client_->getState().getText());
     return MoveItErrorCode(move_action_client_->getResult()->error_code);
   }
-
 }
 
 void moveit::planning_interface::MoveItCpp::constructGoal(moveit_msgs::MoveGroupGoal& goal)
 {
   constructMotionPlanRequest(goal.request);
 }
-
 
 void moveit::planning_interface::MoveItCpp::constructGoal(moveit_msgs::PickupGoal& goal_out, const std::string& object)
 {
@@ -1760,12 +1756,13 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveItCp
   else
   {
     ROS_INFO_STREAM_NAMED("move_group_interface", execute_action_client_->getState().toString()
-                          << ": " << execute_action_client_->getState().getText());
+                                                      << ": " << execute_action_client_->getState().getText());
     return MoveItErrorCode(execute_action_client_->getResult()->error_code);
   }
 }
 
-bool moveit::planning_interface::MoveItCpp::getCurrentState(robot_state::RobotStatePtr& current_state, double wait_seconds)
+bool moveit::planning_interface::MoveItCpp::getCurrentState(robot_state::RobotStatePtr& current_state,
+                                                            double wait_seconds)
 {
   if (!current_state_monitor_)
   {
@@ -1787,7 +1784,9 @@ bool moveit::planning_interface::MoveItCpp::getCurrentState(robot_state::RobotSt
   return true;
 }
 
-bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const geometry_msgs::Pose& eef_pose, const std::string& end_effector_link, const std::string& frame, bool approx)
+bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const geometry_msgs::Pose& eef_pose,
+                                                                const std::string& end_effector_link,
+                                                                const std::string& frame, bool approx)
 {
   const std::string& eef = end_effector_link.empty() ? end_effector_link_ : end_effector_link;
   // this only works if we have an end-effector
@@ -1813,7 +1812,7 @@ bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const geometry_m
     // if no frame transforms are needed, call IK directly
     if (frame.empty() || moveit::core::Transforms::sameFrame(frame, robot_model_->getModelFrame()))
       return joint_state_target_->setFromIK(joint_model_group_, eef_pose, eef, 0.0,
-                                             moveit::core::GroupStateValidityCallbackFn(), o);
+                                            moveit::core::GroupStateValidityCallbackFn(), o);
     else
     {
       if (c->knowsFrameTransform(frame))
@@ -1823,7 +1822,7 @@ bool moveit::planning_interface::MoveItCpp::setJointValueTarget(const geometry_m
         Eigen::Isometry3d p;
         tf2::fromMsg(eef_pose, p);
         return joint_state_target_->setFromIK(joint_model_group_, t * p, eef, 0.0,
-                                               moveit::core::GroupStateValidityCallbackFn(), o);
+                                              moveit::core::GroupStateValidityCallbackFn(), o);
       }
       else
       {
@@ -1855,7 +1854,8 @@ bool moveit::planning_interface::MoveItCpp::hasPoseTarget(const std::string& end
   return pose_targets_.find(eef) != pose_targets_.end();
 }
 
-void moveit::planning_interface::MoveItCpp::initializeConstraintsStorageThread(const std::string& host, unsigned int port)
+void moveit::planning_interface::MoveItCpp::initializeConstraintsStorageThread(const std::string& host,
+                                                                               unsigned int port)
 {
   // Set up db
   try
@@ -1880,48 +1880,48 @@ void moveit::planning_interface::MoveItCpp::clearContents()
   //  TODO Set values to "default values"
   group_name_.clear();
   robot_description_.clear();
-  //node_handle_;
+  // node_handle_;
   tf_buffer_ = nullptr;
-  //robot_model_
+  // robot_model_
   current_state_monitor_ = nullptr;
   execute_action_client_ = nullptr;
   pick_action_client_ = nullptr;
   place_action_client_ = nullptr;
 
   considered_start_state_ = nullptr;
-  //workspace_parameters_
-  //allowed_planning_time_
+  // workspace_parameters_
+  // allowed_planning_time_
   planner_id_.clear();
-  //num_planning_attempts_
-  //max_velocity_scaling_factor_
-  //max_acceleration_scaling_factor_
-  //goal_joint_tolerance_;
-  //goal_position_tolerance_
-  //goal_orientation_tolerance_
-  //can_look_
-  //can_replan_
-  //replan_delay_
+  // num_planning_attempts_
+  // max_velocity_scaling_factor_
+  // max_acceleration_scaling_factor_
+  // goal_joint_tolerance_;
+  // goal_position_tolerance_
+  // goal_orientation_tolerance_
+  // can_look_
+  // can_replan_
+  // replan_delay_
 
   joint_state_target_ = nullptr;
   joint_model_group_ = nullptr;
 
   pose_targets_.clear();
 
-  //active_target_
+  // active_target_
   path_constraints_ = nullptr;
   trajectory_constraints_ = nullptr;
   end_effector_link_.clear();
   pose_reference_frame_.clear();
   support_surface_.clear();
 
-  //trajectory_event_publisher_
-  //attached_object_publisher_
-  //query_service_
-  //get_params_service_
-  //set_params_service_
-  //cartesian_path_service_
-  //plan_grasps_service_
+  // trajectory_event_publisher_
+  // attached_object_publisher_
+  // query_service_
+  // get_params_service_
+  // set_params_service_
+  // cartesian_path_service_
+  // plan_grasps_service_
   constraints_storage_ = nullptr;
   constraints_init_thread_ = nullptr;
-  //initializing_constraints_
+  // initializing_constraints_
 }

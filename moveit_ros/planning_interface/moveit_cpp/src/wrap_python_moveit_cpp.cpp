@@ -63,11 +63,11 @@ class MoveItCppWrapper : protected py_bindings_tools::ROScppInitializer, public 
 public:
   // ROSInitializer is constructed first, and ensures ros::init() was called, if
   // needed
-  MoveItCppWrapper(const std::string& group_name, const std::string& robot_description,
-                            const std::string& ns = "", double wait_for_servers = 5.0)
+  MoveItCppWrapper(const std::string& group_name, const std::string& robot_description, const std::string& ns = "",
+                   double wait_for_servers = 5.0)
     : py_bindings_tools::ROScppInitializer()
-    , MoveItCpp(Options(group_name, robot_description, ros::NodeHandle(ns)),
-                         std::shared_ptr<tf2_ros::Buffer>(), ros::WallDuration(wait_for_servers))
+    , MoveItCpp(Options(group_name, robot_description, ros::NodeHandle(ns)), std::shared_ptr<tf2_ros::Buffer>(),
+                ros::WallDuration(wait_for_servers))
   {
   }
 
@@ -536,8 +536,7 @@ static void wrap_moveit_cpp()
 
   moveit_cpp_class.def("get_name", &MoveItCppWrapper::getNameCStr);
   moveit_cpp_class.def("get_planning_frame", &MoveItCppWrapper::getPlanningFrameCStr);
-  moveit_cpp_class.def("get_interface_description",
-                                 &MoveItCppWrapper::getInterfaceDescriptionPython);
+  moveit_cpp_class.def("get_interface_description", &MoveItCppWrapper::getInterfaceDescriptionPython);
 
   moveit_cpp_class.def("get_active_joints", &MoveItCppWrapper::getActiveJointsList);
   moveit_cpp_class.def("get_joints", &MoveItCppWrapper::getJointsList);
@@ -568,63 +567,52 @@ static void wrap_moveit_cpp()
   moveit_cpp_class.def("clear_pose_target", &MoveItCppWrapper::clearPoseTarget);
   moveit_cpp_class.def("clear_pose_targets", &MoveItCppWrapper::clearPoseTargets);
 
-  moveit_cpp_class.def("set_joint_value_target",
-                                 &MoveItCppWrapper::setJointValueTargetPythonIterable);
+  moveit_cpp_class.def("set_joint_value_target", &MoveItCppWrapper::setJointValueTargetPythonIterable);
   moveit_cpp_class.def("set_joint_value_target", &MoveItCppWrapper::setJointValueTargetPythonDict);
 
-  moveit_cpp_class.def("set_joint_value_target",
-                                 &MoveItCppWrapper::setJointValueTargetPerJointPythonList);
+  moveit_cpp_class.def("set_joint_value_target", &MoveItCppWrapper::setJointValueTargetPerJointPythonList);
   bool (MoveItCppWrapper::*set_joint_value_target_4)(const std::string&, double) =
       &MoveItCppWrapper::setJointValueTarget;
   moveit_cpp_class.def("set_joint_value_target", set_joint_value_target_4);
 
-  moveit_cpp_class.def("set_joint_value_target_from_pose",
-                                 &MoveItCppWrapper::setJointValueTargetFromPosePython);
+  moveit_cpp_class.def("set_joint_value_target_from_pose", &MoveItCppWrapper::setJointValueTargetFromPosePython);
   moveit_cpp_class.def("set_joint_value_target_from_pose_stamped",
-                                 &MoveItCppWrapper::setJointValueTargetFromPoseStampedPython);
+                       &MoveItCppWrapper::setJointValueTargetFromPoseStampedPython);
   moveit_cpp_class.def("set_joint_value_target_from_joint_state_message",
-                                 &MoveItCppWrapper::setJointValueTargetFromJointStatePython);
+                       &MoveItCppWrapper::setJointValueTargetFromJointStatePython);
 
   moveit_cpp_class.def("get_joint_value_target", &MoveItCppWrapper::getJointValueTargetPythonList);
 
   moveit_cpp_class.def("set_named_target", &MoveItCppWrapper::setNamedTarget);
   moveit_cpp_class.def("set_random_target", &MoveItCppWrapper::setRandomTarget);
 
-  void (MoveItCppWrapper::*remember_joint_values_2)(const std::string&) =
-      &MoveItCppWrapper::rememberJointValues;
+  void (MoveItCppWrapper::*remember_joint_values_2)(const std::string&) = &MoveItCppWrapper::rememberJointValues;
   moveit_cpp_class.def("remember_joint_values", remember_joint_values_2);
 
-  moveit_cpp_class.def("remember_joint_values",
-                                 &MoveItCppWrapper::rememberJointValuesFromPythonList);
+  moveit_cpp_class.def("remember_joint_values", &MoveItCppWrapper::rememberJointValuesFromPythonList);
 
   moveit_cpp_class.def("start_state_monitor", &MoveItCppWrapper::startStateMonitor);
   moveit_cpp_class.def("get_current_joint_values", &MoveItCppWrapper::getCurrentJointValuesList);
   moveit_cpp_class.def("get_random_joint_values", &MoveItCppWrapper::getRandomJointValuesList);
-  moveit_cpp_class.def("get_remembered_joint_values",
-                                 &MoveItCppWrapper::getRememberedJointValuesPython);
+  moveit_cpp_class.def("get_remembered_joint_values", &MoveItCppWrapper::getRememberedJointValuesPython);
 
   moveit_cpp_class.def("forget_joint_values", &MoveItCppWrapper::forgetJointValues);
 
   moveit_cpp_class.def("get_goal_joint_tolerance", &MoveItCppWrapper::getGoalJointTolerance);
   moveit_cpp_class.def("get_goal_position_tolerance", &MoveItCppWrapper::getGoalPositionTolerance);
-  moveit_cpp_class.def("get_goal_orientation_tolerance",
-                                 &MoveItCppWrapper::getGoalOrientationTolerance);
+  moveit_cpp_class.def("get_goal_orientation_tolerance", &MoveItCppWrapper::getGoalOrientationTolerance);
 
   moveit_cpp_class.def("set_goal_joint_tolerance", &MoveItCppWrapper::setGoalJointTolerance);
   moveit_cpp_class.def("set_goal_position_tolerance", &MoveItCppWrapper::setGoalPositionTolerance);
-  moveit_cpp_class.def("set_goal_orientation_tolerance",
-                                 &MoveItCppWrapper::setGoalOrientationTolerance);
+  moveit_cpp_class.def("set_goal_orientation_tolerance", &MoveItCppWrapper::setGoalOrientationTolerance);
   moveit_cpp_class.def("set_goal_tolerance", &MoveItCppWrapper::setGoalTolerance);
 
-  moveit_cpp_class.def("set_start_state_to_current_state",
-                                 &MoveItCppWrapper::setStartStateToCurrentState);
+  moveit_cpp_class.def("set_start_state_to_current_state", &MoveItCppWrapper::setStartStateToCurrentState);
   moveit_cpp_class.def("set_start_state", &MoveItCppWrapper::setStartStatePython);
 
-  bool (MoveItCppWrapper::*set_path_constraints_1)(const std::string&) =
-      &MoveItCppWrapper::setPathConstraints;
+  bool (MoveItCppWrapper::*set_path_constraints_1)(const std::string&) = &MoveItCppWrapper::setPathConstraints;
   moveit_cpp_class.def("set_path_constraints", set_path_constraints_1);
-  moveit_cpp_class.def("set_path_constraints_from_msg",
-                                 &MoveItCppWrapper::setPathConstraintsFromMsg);
+  moveit_cpp_class.def("set_path_constraints_from_msg", &MoveItCppWrapper::setPathConstraintsFromMsg);
   moveit_cpp_class.def("get_path_constraints", &MoveItCppWrapper::getPathConstraintsPython);
   moveit_cpp_class.def("clear_path_constraints", &MoveItCppWrapper::clearPathConstraints);
   moveit_cpp_class.def("get_known_constraints", &MoveItCppWrapper::getKnownConstraintsList);
@@ -632,16 +620,13 @@ static void wrap_moveit_cpp()
   moveit_cpp_class.def("set_workspace", &MoveItCppWrapper::setWorkspace);
   moveit_cpp_class.def("set_planning_time", &MoveItCppWrapper::setPlanningTime);
   moveit_cpp_class.def("get_planning_time", &MoveItCppWrapper::getPlanningTime);
-  moveit_cpp_class.def("set_max_velocity_scaling_factor",
-                                 &MoveItCppWrapper::setMaxVelocityScalingFactor);
-  moveit_cpp_class.def("set_max_acceleration_scaling_factor",
-                                 &MoveItCppWrapper::setMaxAccelerationScalingFactor);
+  moveit_cpp_class.def("set_max_velocity_scaling_factor", &MoveItCppWrapper::setMaxVelocityScalingFactor);
+  moveit_cpp_class.def("set_max_acceleration_scaling_factor", &MoveItCppWrapper::setMaxAccelerationScalingFactor);
   moveit_cpp_class.def("set_planner_id", &MoveItCppWrapper::setPlannerId);
   moveit_cpp_class.def("set_num_planning_attempts", &MoveItCppWrapper::setNumPlanningAttempts);
   moveit_cpp_class.def("plan", &MoveItCppWrapper::planPython);
   moveit_cpp_class.def("compute_cartesian_path", &MoveItCppWrapper::computeCartesianPathPython);
-  moveit_cpp_class.def("compute_cartesian_path",
-                                 &MoveItCppWrapper::computeCartesianPathConstrainedPython);
+  moveit_cpp_class.def("compute_cartesian_path", &MoveItCppWrapper::computeCartesianPathConstrainedPython);
   moveit_cpp_class.def("set_support_surface_name", &MoveItCppWrapper::setSupportSurfaceName);
   moveit_cpp_class.def("attach_object", &MoveItCppWrapper::attachObjectPython);
   moveit_cpp_class.def("detach_object", &MoveItCppWrapper::detachObject);
