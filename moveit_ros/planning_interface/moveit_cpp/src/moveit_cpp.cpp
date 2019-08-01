@@ -86,13 +86,6 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const std::string& group_name,
 {
 }
 
-moveit::planning_interface::MoveItCpp::MoveItCpp(const std::string& group,
-                                                 const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                                 const ros::Duration& wait_for_servers)
-  : MoveItCpp(Options(group), tf_buffer, ros::WallDuration(wait_for_servers.toSec()))
-{
-}
-
 moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                                  const ros::WallDuration& wait_for_servers)
   : node_handle_(opt.node_handle_), tf_buffer_(tf_buffer)
@@ -179,13 +172,6 @@ moveit::planning_interface::MoveItCpp::MoveItCpp(const Options& opt, const std::
   ROS_INFO_STREAM_NAMED("move_group_interface", "Ready to take commands for planning group " << opt.group_name_ << ".");
   group_name_ = opt.group_name_;
   robot_description_ = opt.robot_description_;
-}
-
-moveit::planning_interface::MoveItCpp::MoveItCpp(const moveit::planning_interface::MoveItCpp::Options& opt,
-                                                 const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                                 const ros::Duration& wait_for_servers)
-  : MoveItCpp(opt, tf_buffer, ros::WallDuration(wait_for_servers.toSec()))
-{
 }
 
 moveit::planning_interface::MoveItCpp::~MoveItCpp()
