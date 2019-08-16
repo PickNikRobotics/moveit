@@ -97,6 +97,7 @@ namespace moveit
 /** \brief Simple interface to MoveIt components */
 namespace planning_interface
 {
+//TODO(henningkayser): Move to own header and share with MoveGroup
 class MoveItErrorCode : public moveit_msgs::MoveItErrorCodes
 {
 public:
@@ -950,6 +951,7 @@ public:
    */
   /**@{*/
 
+  //TODO(henningkayser): Remove this for now
   /** \brief Specify where the database server that holds known constraints resides */
   void setConstraintsDatabase(const std::string& host, unsigned int port);
 
@@ -987,6 +989,7 @@ protected:
 
 private:
   std::map<std::string, std::vector<double> > remembered_joint_values_;
+  // TODO(henningkayser): Refactor class and possibly remove impl concept
   class MoveItCppImpl;
   MoveItCppImpl* impl_;
 
