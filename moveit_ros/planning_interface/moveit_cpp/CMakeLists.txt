@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_cpp)
 
-add_library(${MOVEIT_LIB_NAME} src/moveit_cpp.cpp)
+add_library(${MOVEIT_LIB_NAME} src/moveit.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(${MOVEIT_LIB_NAME} moveit_common_planning_interface_objects moveit_planning_scene_interface ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
