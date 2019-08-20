@@ -37,24 +37,11 @@
 #ifndef MOVEIT_MOVEIT_CPP_MOVEIT_CPP_
 #define MOVEIT_MOVEIT_CPP_MOVEIT_CPP_
 
-#include <moveit/warehouse/constraints_storage.h>
 #include <moveit/macros/class_forward.h>
-#include <moveit/macros/deprecation.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit_msgs/RobotTrajectory.h>
 #include <moveit_msgs/RobotState.h>
-#include <moveit_msgs/PlannerInterfaceDescription.h>
-#include <moveit_msgs/Constraints.h>
-#include <moveit_msgs/Grasp.h>
-#include <moveit_msgs/MotionPlanRequest.h>
-#include <moveit_msgs/MoveGroupAction.h>
-#include <moveit_msgs/ExecuteTrajectoryAction.h>
-#include <moveit_msgs/PlaceAction.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <moveit/robot_state/conversions.h>
-#include <actionlib/client/simple_action_client.h>
 #include <memory>
 #include <tf2_ros/buffer.h>
 
