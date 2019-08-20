@@ -50,33 +50,6 @@ namespace planning_scene_monitor
 MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);
 }
 
-namespace planning_pipeline
-{
-MOVEIT_CLASS_FORWARD(PlanningPipeline);
-}
-
-namespace plan_execution
-{
-MOVEIT_CLASS_FORWARD(PlanExecution);
-MOVEIT_CLASS_FORWARD(PlanWithSensing);
-}
-
-namespace trajectory_execution_manager
-{
-MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager);
-}
-
-namespace
-{
-enum ActiveTargetType
-{
-  JOINT,
-  POSE,
-  POSITION,
-  ORIENTATION
-};
-}
-
 namespace moveit
 {
 /** \brief Simple interface to MoveIt components */
@@ -143,21 +116,6 @@ public:
     ros::NodeHandle node_handle_;
   };
 
-  MOVEIT_STRUCT_FORWARD(Plan);
-
-  /// The representation of a motion plan (as ROS messages)
-  struct Plan
-  {
-    /// The full starting state used for planning
-    moveit_msgs::RobotState start_state_;
-
-    /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
-    moveit_msgs::RobotTrajectory trajectory_;
-
-    /// The amount of time it took to generate the plan
-    double planning_time_;
-  };
-
   /**
       \brief Construct a MoveItCpp instance call using a specified set of options \e opt.
 
@@ -217,7 +175,6 @@ private:
   robot_model::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-
   void clearContents();
 };
 }  // namespace planning_interface
