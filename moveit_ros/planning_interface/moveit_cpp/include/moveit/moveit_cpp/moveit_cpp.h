@@ -907,22 +907,10 @@ public:
    */
   /**@{*/
 
-  //TODO(henningkayser): Remove this for now
-  /** \brief Specify where the database server that holds known constraints resides */
-  void setConstraintsDatabase(const std::string& host, unsigned int port);
-
-  /** \brief Get the names of the known constraints as read from the Mongo database, if a connection was achieved. */
-  std::vector<std::string> getKnownConstraints() const;
-
   /** \brief Get the actual set of constraints in use with this MoveItCpp.
       @return A copy of the current path constraints set for this interface
       */
   moveit_msgs::Constraints getPathConstraints() const;
-
-  /** \brief Specify a set of path constraints to use.
-      The constraints are looked up by name from the Mongo database server.
-      This replaces any path constraints set in previous calls to setPathConstraints(). */
-  bool setPathConstraints(const std::string& constraint);
 
   /** \brief Specify a set of path constraints to use.
       This version does not require a database server.
@@ -974,26 +962,6 @@ private:
   bool allow_trajectory_execution_;
   bool debug_;
 
-  // impl contents
-  void initializeConstraintsStorageThread(const std::string& host, unsigned int port);
-  /*{
-    // Set up db
-    try
-    {
-      warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
-      conn->setParams(host, port);
-      if (conn->connect())
-      {
-        constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
-      }
-    }
-    catch (std::exception& ex)
-    {
-      ROS_ERROR_NAMED("move_group_interface", "%s", ex.what());
-    }
-    initializing_constraints_ = false;
-  } */
-
   //  Options
   std::string group_name_;
   std::string robot_description_;
@@ -1043,9 +1011,6 @@ private:
   ros::ServiceClient set_params_service_;
   ros::ServiceClient cartesian_path_service_;
   ros::ServiceClient plan_grasps_service_;
-  std::unique_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
-  std::unique_ptr<boost::thread> constraints_init_thread_;
-  bool initializing_constraints_;
 };
 }  // namespace planning_interface
 }  // namespace moveit

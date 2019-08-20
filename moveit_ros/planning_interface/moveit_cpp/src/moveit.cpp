@@ -38,7 +38,6 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
-#include <moveit/warehouse/constraints_storage.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
@@ -119,7 +118,6 @@ MoveItCpp::MoveItCpp(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>&
   num_planning_attempts_ = 1;
   max_velocity_scaling_factor_ = 1.0;
   max_acceleration_scaling_factor_ = 1.0;
-  initializing_constraints_ = false;
 
   if (joint_model_group_->isChain())
     end_effector_link_ = joint_model_group_->getLinkModelNames().back();
@@ -218,9 +216,6 @@ MoveItCpp& MoveItCpp::operator=(MoveItCpp&& other)
     this->set_params_service_ = other.set_params_service_;
     this->cartesian_path_service_ = other.cartesian_path_service_;
     this->plan_grasps_service_ = other.plan_grasps_service_;
-    swap(this->constraints_storage_, other.constraints_storage_);
-    swap(this->constraints_init_thread_, other.constraints_init_thread_);
-    this->initializing_constraints_ = other.initializing_constraints_;
 
     remembered_joint_values_ = std::move(other.remembered_joint_values_);
     other.clearContents();
@@ -1139,44 +1134,12 @@ void MoveItCpp::allowReplanning(bool flag)
   ROS_INFO_NAMED("move_group_interface", "Replanning: %s", can_replan_ ? "yes" : "no");
 }
 
-std::vector<std::string> MoveItCpp::getKnownConstraints() const
-{
-  while (initializing_constraints_)
-  {
-    static ros::WallDuration d(0.01);
-    d.sleep();
-  }
-
-  std::vector<std::string> c;
-  if (constraints_storage_)
-    constraints_storage_->getKnownConstraints(c, robot_model_->getName(), group_name_);
-
-  return c;
-}
-
 moveit_msgs::Constraints MoveItCpp::getPathConstraints() const
 {
   if (path_constraints_)
     return *path_constraints_;
   else
     return moveit_msgs::Constraints();
-}
-
-bool MoveItCpp::setPathConstraints(const std::string& constraint)
-{
-  if (constraints_storage_)
-  {
-    moveit_warehouse::ConstraintsWithMetadata msg_m;
-    if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), group_name_))
-    {
-      path_constraints_.reset(new moveit_msgs::Constraints(static_cast<moveit_msgs::Constraints>(*msg_m)));
-      return true;
-    }
-    else
-      return false;
-  }
-  else
-    return false;
 }
 
 void MoveItCpp::setPathConstraints(const moveit_msgs::Constraints& constraint)
@@ -1206,15 +1169,6 @@ void MoveItCpp::setTrajectoryConstraints(
 void MoveItCpp::clearTrajectoryConstraints()
 {
   trajectory_constraints_.reset();
-}
-
-void MoveItCpp::setConstraintsDatabase(const std::string& host, unsigned int port)
-{
-  initializing_constraints_ = true;
-  if (constraints_init_thread_)
-    constraints_init_thread_->join();
-  constraints_init_thread_.reset(
-      new boost::thread(boost::bind(&MoveItCpp::initializeConstraintsStorageThread, this, host, port)));
 }
 
 void MoveItCpp::setWorkspace(double minx, double miny, double minz, double maxx,
@@ -1603,26 +1557,6 @@ bool MoveItCpp::hasPoseTarget(const std::string& end_effector_link) const
   return pose_targets_.find(eef) != pose_targets_.end();
 }
 
-void MoveItCpp::initializeConstraintsStorageThread(const std::string& host,
-                                                                               unsigned int port)
-{
-  // Set up db
-  try
-  {
-    warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
-    conn->setParams(host, port);
-    if (conn->connect())
-    {
-      constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
-    }
-  }
-  catch (std::exception& ex)
-  {
-    ROS_ERROR_NAMED("move_group_interface", "%s", ex.what());
-  }
-  initializing_constraints_ = false;
-}
-
 void MoveItCpp::clearContents()
 {
   //  TODO Instead of setting to nullptrs actually delete
@@ -1668,8 +1602,6 @@ void MoveItCpp::clearContents()
   // set_params_service_
   // cartesian_path_service_
   // plan_grasps_service_
-  constraints_storage_ = nullptr;
-  constraints_init_thread_ = nullptr;
   // initializing_constraints_
 }
 }  //  planning_interface
