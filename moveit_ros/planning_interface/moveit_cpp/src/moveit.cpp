@@ -317,15 +317,10 @@ bool MoveitCpp::execute(const std::string& group_name, const robot_trajectory::R
 
 void MoveitCpp::clearContents()
 {
-  ROS_INFO_NAMED(LOGNAME, "robot_description");
   robot_description_.clear();
-  ROS_INFO_NAMED(LOGNAME, "tf_buffer_");
   tf_buffer_.reset();
-  ROS_INFO_NAMED(LOGNAME, "planning_scene_monitor");
   planning_scene_monitor_.reset();
-  ROS_INFO_NAMED(LOGNAME, "robot_model");
   robot_model_.reset();
-  ROS_INFO_NAMED(LOGNAME, "pipelines");
   planning_pipelines_.clear();
 }
 }  //  planning_interface
