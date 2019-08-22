@@ -42,11 +42,6 @@
 #include <moveit/robot_state/robot_state.h>
 #include <tf2_ros/buffer.h>
 
-//namespace planning_scene_monitor
-//{
-//MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);
-//}
-
 namespace moveit
 {
 namespace planning_interface
@@ -64,10 +59,14 @@ public:
       std::string ns = "planning_scene_monitor_options/";
       nh.param<std::string>(ns + "name", name, "planning_scene_monitor");
       nh.param<std::string>(ns + "robot_description", robot_description, "robot_description");
-      nh.param(ns + "joint_state_topic", joint_state_topic, planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC);
-      nh.param(ns + "attached_collision_object_topic", attached_collision_object_topic, planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC);
-      nh.param(ns + "monitored_planning_scene_topic", monitored_planning_scene_topic, planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC);
-      nh.param(ns + "publish_planning_scene_topic", publish_planning_scene_topic, planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
+      nh.param(ns + "joint_state_topic", joint_state_topic,
+               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC);
+      nh.param(ns + "attached_collision_object_topic", attached_collision_object_topic,
+               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC);
+      nh.param(ns + "monitored_planning_scene_topic", monitored_planning_scene_topic,
+               planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC);
+      nh.param(ns + "publish_planning_scene_topic", publish_planning_scene_topic,
+               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
     };
     std::string name;
     std::string robot_description;
@@ -90,23 +89,23 @@ public:
 
     struct PlanningPipelineOptions
     {
-    void load(const ros::NodeHandle& nh)
-    {
-      std::string ns = "planning_pipeline_options/";
-      nh.getParam(ns + "pipeline_names", pipeline_names);
-    };
-    std::vector<std::string> pipeline_names;
+      void load(const ros::NodeHandle& nh)
+      {
+        std::string ns = "planning_pipeline_options/";
+        nh.getParam(ns + "pipeline_names", pipeline_names);
+      };
+      std::vector<std::string> pipeline_names;
     };
     PlanningPipelineOptions planning_pipeline_options;
     struct PlannerOptions
     {
-    void load(const ros::NodeHandle& nh)
-    {
-      std::string ns = "default_planner_options/";
-      nh.getParam(ns + "planning_attempts", planning_attempts);
-      nh.getParam(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor);
-      nh.getParam(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor);
-    };
+      void load(const ros::NodeHandle& nh)
+      {
+        std::string ns = "default_planner_options/";
+        nh.getParam(ns + "planning_attempts", planning_attempts);
+        nh.getParam(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor);
+        nh.getParam(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor);
+      };
       int planning_attempts;
       double planning_time;
       double max_velocity_scaling_factor;
@@ -116,8 +115,10 @@ public:
   };
 
   /** \brief Constructor */
-  MoveitCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>());
-  MoveitCpp(const Options& opt, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>());
+  MoveitCpp(const ros::NodeHandle& nh,
+            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>());
+  MoveitCpp(const Options& opt, const ros::NodeHandle& nh,
+            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>());
 
   /**
    * @brief This class owns unique resources (e.g. action clients, threads) and its not very
@@ -143,12 +144,13 @@ public:
   bool getCurrentState(robot_state::RobotStatePtr& current_state, double wait_seconds);
 
   /** \brief Get the current state queried from the current state monitor */
-  robot_state::RobotStatePtr getCurrentState(double wait_seconds=0.0);
+  robot_state::RobotStatePtr getCurrentState(double wait_seconds = 0.0);
 
   /** \brief Get all loaded planning pipeline instances mapped to their reference names */
   const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& getPlanningPipelines() const;
 
-  /** \brief Get the names of all loaded planning pipelines. Specify group_name to filter the results by planning group */
+  /** \brief Get the names of all loaded planning pipelines. Specify group_name to filter the results by planning group
+   */
   std::set<std::string> getPlanningPipelineNames(const std::string& group_name = "") const;
 
   /** \brief Get the stored instance of the planning scene monitor */
@@ -159,8 +161,10 @@ public:
   const trajectory_execution_manager::TrajectoryExecutionManagerPtr& getTrajectoryExecutionManager() const;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr getTrajectoryExecutionManagerNonConst();
 
-  /** \brief Execute a trajectory on the planning group specified by group_name using the trajectory execution manager. If blocking is set to false, the execution is run in background and the function returns immediately. */
-  bool execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking=true);
+  /** \brief Execute a trajectory on the planning group specified by group_name using the trajectory execution manager.
+   * If blocking is set to false, the execution is run in background and the function returns immediately. */
+  bool execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+               bool blocking = true);
 
 protected:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

@@ -43,14 +43,8 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <moveit/robot_state/conversions.h>
 
-namespace planning_pipeline
-{
-MOVEIT_CLASS_FORWARD(PlanningPipeline);
-}
-
 namespace moveit
 {
-/** \brief Simple interface to MoveIt planning components */
 namespace planning_interface
 {
 MOVEIT_CLASS_FORWARD(PlanningComponent);
@@ -81,6 +75,7 @@ public:
     double max_acceleration_scaling_factor;
   };
 
+  /** \brief Constructor */
   PlanningComponent(const std::string& group_name, const ros::NodeHandle& nh);
   PlanningComponent(const std::string& group_name, const MoveitCppPtr& moveit_context);
 
@@ -94,6 +89,8 @@ public:
 
   PlanningComponent(PlanningComponent&& other);
   PlanningComponent& operator=(PlanningComponent&& other);
+
+  /** \brief Destructor */
   ~PlanningComponent();
 
   /** \brief Get the name of the planning group */
@@ -134,13 +131,17 @@ public:
   /** \brief Set the goal constraints generated from a named target state */
   bool setGoal(const std::string& named_target);
 
-  /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using default parameters. */
+  /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using
+   * default parameters. */
   bool plan();
-  /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the provided PlanRequestParameters. */
+  /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
+   * provided PlanRequestParameters. */
   bool plan(const PlanRequestParameters& parameters);
 
-  /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates after the execution is complete. The execution can be run in background by setting blocking to false. */
-  bool execute(bool blocking=true);
+  /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
+   * after the execution is complete. The execution can be run in background by setting blocking to false. */
+  bool execute(bool blocking = true);
+
 private:
   // Core properties and instances
   ros::NodeHandle nh_;
@@ -159,12 +160,12 @@ private:
 
   // common properties for goals
   // TODO(henningkayser): support goal tolerances
-  //double goal_joint_tolerance_;
-  //double goal_position_tolerance_;
-  //double goal_orientation_tolerance_;
+  // double goal_joint_tolerance_;
+  // double goal_position_tolerance_;
+  // double goal_orientation_tolerance_;
   // TODO(henningkayser): implment path/trajectory constraints
-  //std::unique_ptr<moveit_msgs::Constraints> path_constraints_;
-  //std::unique_ptr<moveit_msgs::TrajectoryConstraints> trajectory_constraints_;
+  // std::unique_ptr<moveit_msgs::Constraints> path_constraints_;
+  // std::unique_ptr<moveit_msgs::TrajectoryConstraints> trajectory_constraints_;
 
   /** \brief Reset all member variables */
   void clearContents();

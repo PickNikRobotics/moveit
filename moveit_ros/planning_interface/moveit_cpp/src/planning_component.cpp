@@ -32,7 +32,6 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 /* Author: Henning Kayser */
 
 #include <stdexcept>
@@ -136,12 +135,13 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
   }
 
   // Clone current planning scene
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor = moveit_cpp_->getPlanningSceneMonitorNonConst();
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
+      moveit_cpp_->getPlanningSceneMonitorNonConst();
   planning_scene_monitor->lockSceneRead();  // LOCK planning scene
   planning_scene::PlanningScenePtr planning_scene =
-    planning_scene::PlanningScene::clone(planning_scene_monitor->getPlanningScene());
+      planning_scene::PlanningScene::clone(planning_scene_monitor->getPlanningScene());
   planning_scene_monitor->unlockSceneRead();  // UNLOCK planning scene
-  planning_scene_monitor.reset(); // release this pointer
+  planning_scene_monitor.reset();             // release this pointer
 
   // Init MotionPlanRequest
   ::planning_interface::MotionPlanRequest req;
@@ -176,7 +176,7 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
     return false;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline =
-    moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
+      moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
   pipeline->generatePlan(planning_scene, req, res);
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
@@ -187,8 +187,8 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
   last_plan_solution_->start_state = req.start_state;
   last_plan_solution_->trajectory = res.trajectory_;
   // TODO(henningkayser): Visualize trajectory
-  //std::vector<const moveit::core::LinkModel*> eef_links;
-  //if (joint_model_group->getEndEffectorTips(eef_links))
+  // std::vector<const moveit::core::LinkModel*> eef_links;
+  // if (joint_model_group->getEndEffectorTips(eef_links))
   //{
   //  for (const auto& eef_link : eef_links)
   //  {
@@ -243,8 +243,7 @@ std::map<std::string, double> PlanningComponent::getNamedTargetValues(const std:
   return positions;
 }
 
-void PlanningComponent::setWorkspace(double minx, double miny, double minz, double maxx,
-                                                         double maxy, double maxz)
+void PlanningComponent::setWorkspace(double minx, double miny, double minz, double maxx, double maxy, double maxz)
 {
   workspace_parameters_.header.frame_id = moveit_cpp_->getRobotModel()->getModelFrame();
   workspace_parameters_.header.stamp = ros::Time::now();
@@ -279,7 +278,8 @@ bool PlanningComponent::setGoal(const geometry_msgs::PoseStamped& goal_pose, con
   const auto& joint_names = joint_model_group_->getLinkModelNames();
   if (std::find(joint_names.begin(), joint_names.end(), link_name) == joint_names.end())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Link '%s' is not part of joint model group '%s'.", link_name.c_str(), group_name_.c_str());
+    ROS_ERROR_NAMED(LOGNAME, "Link '%s' is not part of joint model group '%s'.", link_name.c_str(),
+                    group_name_.c_str());
     return false;
   }
   current_goal_constraints_ = { kinematic_constraints::constructGoalConstraints(link_name, goal_pose) };
@@ -308,8 +308,9 @@ bool PlanningComponent::execute(bool blocking)
   }
 
   // TODO(henningkayser): parameterize timestamps if required
-  //trajectory_processing::TimeOptimalTrajectoryGeneration totg;
-  //if (!totg.computeTimeStamps(*last_solution_trajectory_, max_velocity_scaling_factor_, max_acceleration_scaling_factor_))
+  // trajectory_processing::TimeOptimalTrajectoryGeneration totg;
+  // if (!totg.computeTimeStamps(*last_solution_trajectory_, max_velocity_scaling_factor_,
+  // max_acceleration_scaling_factor_))
   //{
   //  ROS_ERROR("Failed to parameterize trajectory");
   //  return false;

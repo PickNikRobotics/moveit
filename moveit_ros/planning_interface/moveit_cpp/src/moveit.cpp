@@ -32,7 +32,6 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 /* Author: Henning Kayser */
 
 #include <stdexcept>
@@ -54,14 +53,12 @@ constexpr char LOGNAME[] = "moveit_cpp";
 constexpr char PLANNING_SCENE_MONITOR_NAME[] = "moveit_cpp_planning_scene";
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
-MoveitCpp::MoveitCpp(const ros::NodeHandle& nh,
-    const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+MoveitCpp::MoveitCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
   : MoveitCpp(Options(nh), nh, tf_buffer)
 {
 }
 
-MoveitCpp::MoveitCpp(const Options& opt, const ros::NodeHandle& nh,
-    const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+MoveitCpp::MoveitCpp(const Options& opt, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
   : tf_buffer_(tf_buffer)
 {
   // Configure planning scene monitor
@@ -90,8 +87,8 @@ MoveitCpp::MoveitCpp(const Options& opt, const ros::NodeHandle& nh,
   }
 
   // TODO(henningkayser): configure trajectory execution manager
-  trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(robot_model_,
-        planning_scene_monitor_->getStateMonitor()));
+  trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
+      robot_model_, planning_scene_monitor_->getStateMonitor()));
 
   ROS_INFO_NAMED(LOGNAME, "MoveitCpp running");
 }
@@ -124,8 +121,8 @@ MoveitCpp& MoveitCpp::operator=(MoveitCpp&& other)
 
 bool MoveitCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt)
 {
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(opt.robot_description, tf_buffer_,
-                                                                                 opt.name));
+  planning_scene_monitor_.reset(
+      new planning_scene_monitor::PlanningSceneMonitor(opt.robot_description, tf_buffer_, opt.name));
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   ROS_DEBUG_STREAM_NAMED(LOGNAME, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
@@ -133,7 +130,8 @@ bool MoveitCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt)
     // Start state and scene monitors
     ROS_INFO_NAMED(LOGNAME, "Listening to '%s' for joint states", opt.joint_state_topic.c_str());
     planning_scene_monitor_->startStateMonitor(opt.joint_state_topic, opt.attached_collision_object_topic);
-    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, opt.publish_planning_scene_topic);
+    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
+                                                          opt.publish_planning_scene_topic);
     planning_scene_monitor_->startSceneMonitor(opt.monitored_planning_scene_topic);
   }
   else
@@ -170,12 +168,10 @@ bool MoveitCpp::loadPlanningPipelines(std::vector<std::string> pipeline_names)
     ROS_INFO_NAMED(LOGNAME, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
     ros::NodeHandle child_nh(pnh, planning_pipeline_name);
     planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline.reset(
-        new planning_pipeline::PlanningPipeline(robot_model_, child_nh, PLANNING_PLUGIN_PARAM));
+    pipeline.reset(new planning_pipeline::PlanningPipeline(robot_model_, child_nh, PLANNING_PLUGIN_PARAM));
 
     if (!pipeline->getPlannerManager())
     {
-
       ROS_ERROR_NAMED(LOGNAME, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
       continue;
     }
@@ -209,7 +205,6 @@ bool MoveitCpp::loadPlanningPipelines(std::vector<std::string> pipeline_names)
   return true;
 }
 
-
 robot_model::RobotModelConstPtr MoveitCpp::getRobotModel() const
 {
   ROS_DEBUG_NAMED(LOGNAME, "MoveitCpp::getRobotModel()");
@@ -224,7 +219,8 @@ const ros::NodeHandle& MoveitCpp::getNodeHandle() const
 
 bool MoveitCpp::getCurrentState(robot_state::RobotStatePtr& current_state, double wait_seconds)
 {
-  if (wait_seconds > 0.0 && !planning_scene_monitor_->getStateMonitor()->waitForCurrentState(ros::Time::now(), wait_seconds))
+  if (wait_seconds > 0.0 &&
+      !planning_scene_monitor_->getStateMonitor()->waitForCurrentState(ros::Time::now(), wait_seconds))
   {
     ROS_ERROR_NAMED(LOGNAME, "Did not receive robot state");
     return false;
@@ -290,7 +286,8 @@ trajectory_execution_manager::TrajectoryExecutionManagerPtr MoveitCpp::getTrajec
   return trajectory_execution_manager_;
 }
 
-bool MoveitCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory, bool blocking)
+bool MoveitCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+                        bool blocking)
 {
   if (!robot_trajectory)
   {
@@ -317,7 +314,6 @@ bool MoveitCpp::execute(const std::string& group_name, const robot_trajectory::R
   trajectory_execution_manager_->pushAndExecute(robot_trajectory_msg);
   return true;
 }
-
 
 void MoveitCpp::clearContents()
 {
