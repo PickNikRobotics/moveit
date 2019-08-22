@@ -33,7 +33,7 @@
  *********************************************************************/
 
 
-/* Author: Simon Goldstein, Henning Kayser */
+/* Author: Henning Kayser */
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>

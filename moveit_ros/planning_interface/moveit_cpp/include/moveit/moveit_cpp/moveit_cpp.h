@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Simon Goldstein, Henning Kayser */
+/* Author: Henning Kayser */
 
 #pragma once
 
