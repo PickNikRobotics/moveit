@@ -59,8 +59,11 @@ MoveitCpp::MoveitCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::B
 }
 
 MoveitCpp::MoveitCpp(const Options& opt, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : tf_buffer_(tf_buffer)
 {
+  if (!tf_buffer_)
+    tf_buffer_.reset(new tf2_ros::Buffer());
+  tf_listener_.reset(new tf2_ros::TransformListener(*tf_buffer_));
+
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(opt.planning_scene_monitor_options))
   {
@@ -79,7 +82,7 @@ MoveitCpp::MoveitCpp(const Options& opt, const ros::NodeHandle& nh, const std::s
   }
 
   bool load_planning_pipelines = true;
-  if (load_planning_pipelines && !loadPlanningPipelines(opt.planning_pipeline_options.pipeline_names))
+  if (load_planning_pipelines && !loadPlanningPipelines(opt.planning_pipeline_options))
   {
     std::string error = "Failed to load planning pipelines from parameter server";
     ROS_FATAL_STREAM_NAMED(LOGNAME, error);
@@ -155,10 +158,10 @@ bool MoveitCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt)
   return true;
 }
 
-bool MoveitCpp::loadPlanningPipelines(std::vector<std::string> pipeline_names)
+bool MoveitCpp::loadPlanningPipelines(const PlanningPipelineOptions& opt)
 {
-  ros::NodeHandle pnh("~");
-  for (const auto& planning_pipeline_name : pipeline_names)
+  ros::NodeHandle node_handle(opt.parent_namespace.empty() ? "~" : opt.parent_namespace);
+  for (const auto& planning_pipeline_name : opt.pipeline_names)
   {
     if (planning_pipelines_.count(planning_pipeline_name) > 0)
     {
@@ -166,7 +169,7 @@ bool MoveitCpp::loadPlanningPipelines(std::vector<std::string> pipeline_names)
       continue;
     }
     ROS_INFO_NAMED(LOGNAME, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
-    ros::NodeHandle child_nh(pnh, planning_pipeline_name);
+    ros::NodeHandle child_nh(node_handle, planning_pipeline_name);
     planning_pipeline::PlanningPipelinePtr pipeline;
     pipeline.reset(new planning_pipeline::PlanningPipeline(robot_model_, child_nh, PLANNING_PLUGIN_PARAM));
 
@@ -313,6 +316,11 @@ bool MoveitCpp::execute(const std::string& group_name, const robot_trajectory::R
   }
   trajectory_execution_manager_->pushAndExecute(robot_trajectory_msg);
   return true;
+}
+
+const std::shared_ptr<tf2_ros::Buffer>& MoveitCpp::getTFBuffer() const
+{
+  return tf_buffer_;
 }
 
 void MoveitCpp::clearContents()

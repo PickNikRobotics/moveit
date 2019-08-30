@@ -137,6 +137,7 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
   // Clone current planning scene
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
       moveit_cpp_->getPlanningSceneMonitorNonConst();
+  planning_scene_monitor->updateFrameTransforms();
   planning_scene_monitor->lockSceneRead();  // LOCK planning scene
   planning_scene::PlanningScenePtr planning_scene =
       planning_scene::PlanningScene::clone(planning_scene_monitor->getPlanningScene());
@@ -276,12 +277,12 @@ bool PlanningComponent::setGoal(const robot_state::RobotState& goal_state)
 bool PlanningComponent::setGoal(const geometry_msgs::PoseStamped& goal_pose, const std::string& link_name)
 {
   const auto& joint_names = joint_model_group_->getLinkModelNames();
-  if (std::find(joint_names.begin(), joint_names.end(), link_name) == joint_names.end())
-  {
-    ROS_ERROR_NAMED(LOGNAME, "Link '%s' is not part of joint model group '%s'.", link_name.c_str(),
-                    group_name_.c_str());
-    return false;
-  }
+  // if (std::find(joint_names.begin(), joint_names.end(), link_name) == joint_names.end())
+  //{
+  //  ROS_ERROR_NAMED(LOGNAME, "Link '%s' is not part of joint model group '%s'.", link_name.c_str(),
+  //                  group_name_.c_str());
+  //  return false;
+  //}
   current_goal_constraints_ = { kinematic_constraints::constructGoalConstraints(link_name, goal_pose) };
   return true;
 }

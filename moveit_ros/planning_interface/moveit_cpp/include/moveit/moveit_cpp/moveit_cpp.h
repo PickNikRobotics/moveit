@@ -41,6 +41,7 @@
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/robot_state/robot_state.h>
 #include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 
 namespace moveit
 {
@@ -75,6 +76,31 @@ public:
     std::string monitored_planning_scene_topic;
     std::string publish_planning_scene_topic;
   };
+  struct PlanningPipelineOptions
+  {
+    void load(const ros::NodeHandle& nh)
+    {
+      std::string ns = "planning_pipelines/";
+      nh.getParam(ns + "pipeline_names", pipeline_names);
+      nh.getParam(ns + "namespace", parent_namespace);
+    };
+    std::vector<std::string> pipeline_names;
+    std::string parent_namespace;
+  };
+  struct PlannerOptions
+  {
+    void load(const ros::NodeHandle& nh)
+    {
+      std::string ns = "default_planner_options/";
+      nh.getParam(ns + "planning_attempts", planning_attempts);
+      nh.getParam(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor);
+      nh.getParam(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor);
+    };
+    int planning_attempts;
+    double planning_time;
+    double max_velocity_scaling_factor;
+    double max_acceleration_scaling_factor;
+  };
 
   /// Parameter container for initializing MoveitCpp
   struct Options
@@ -85,40 +111,15 @@ public:
       default_planner_options.load(nh);
       planning_pipeline_options.load(nh);
     }
-    PlanningSceneMonitorOptions planning_scene_monitor_options;
 
-    struct PlanningPipelineOptions
-    {
-      void load(const ros::NodeHandle& nh)
-      {
-        std::string ns = "planning_pipeline_options/";
-        nh.getParam(ns + "pipeline_names", pipeline_names);
-      };
-      std::vector<std::string> pipeline_names;
-    };
+    PlanningSceneMonitorOptions planning_scene_monitor_options;
     PlanningPipelineOptions planning_pipeline_options;
-    struct PlannerOptions
-    {
-      void load(const ros::NodeHandle& nh)
-      {
-        std::string ns = "default_planner_options/";
-        nh.getParam(ns + "planning_attempts", planning_attempts);
-        nh.getParam(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor);
-        nh.getParam(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor);
-      };
-      int planning_attempts;
-      double planning_time;
-      double max_velocity_scaling_factor;
-      double max_acceleration_scaling_factor;
-    };
     PlannerOptions default_planner_options;
   };
 
   /** \brief Constructor */
-  MoveitCpp(const ros::NodeHandle& nh,
-            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>());
-  MoveitCpp(const Options& opt, const ros::NodeHandle& nh,
-            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>());
+  MoveitCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
+  MoveitCpp(const Options& opt, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
 
   /**
    * @brief This class owns unique resources (e.g. action clients, threads) and its not very
@@ -157,6 +158,8 @@ public:
   const planning_scene_monitor::PlanningSceneMonitorPtr& getPlanningSceneMonitor() const;
   planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitorNonConst();
 
+  const std::shared_ptr<tf2_ros::Buffer>& getTFBuffer() const;
+
   /** \brief Get the stored instance of the trajectory execution manager */
   const trajectory_execution_manager::TrajectoryExecutionManagerPtr& getTrajectoryExecutionManager() const;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr getTrajectoryExecutionManagerNonConst();
@@ -168,6 +171,7 @@ public:
 
 protected:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
 private:
   //  Core properties and instances
@@ -191,7 +195,7 @@ private:
   bool loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt);
 
   /** \brief Initialize and setup the planning pipelines */
-  bool loadPlanningPipelines(std::vector<std::string> pipeline_names);
+  bool loadPlanningPipelines(const PlanningPipelineOptions& opt);
 };
 }  // namespace planning_interface
 }  // namespace moveit
