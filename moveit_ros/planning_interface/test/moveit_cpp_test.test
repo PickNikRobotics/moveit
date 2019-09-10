@@ -1,0 +1,21 @@
+<launch>
+	<rosparam ns="moveit_cpp_test" file="$(find ur5_moveit_config)/config/controllers.yaml"/>  
+	<!--param name="use_controller_manager" value="false"/-->  
+	<param name="trajectory_execution/execution_duration_monitoring" value="false"/>  
+ 	<!--param name="moveit_controller_manager"  value="moveit_simple_controller_manager/MoveItSimpleControllerManager"/--> 
+	<!-- The name of the parameter under which the URDF is loaded -->
+    <arg name="robot_description" default="robot_description"/>
+	<!-- Load universal robot description format (URDF) -->
+	<param name="robot_description"
+    command="$(find xacro)/xacro --inorder '$(find ur_description)/urdf/ur5_robot.urdf.xacro'" />
+    <!-- The semantic description that corresponds to the URDF -->
+    <param name="$(arg robot_description)_semantic" textfile="$(find ur5_moveit_config)/config/ur5.srdf" />
+    <!-- send fake joint values -->
+  	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+    <!-- Start robot state publisher -->
+  	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <!-- Specify the config files to use -->
+    <rosparam ns="moveit_cpp_test"  command="load" file="$(find moveit_ros_planning_interface)/test/moveit_cpp.yaml" />
+    <!--node pkg="moveit_ros_planning_interface" type="moveit_cpp_test" name="moveit_cpp_test" /-->
+    <test test-name="moveit_cpp_test" pkg="moveit_ros_planning_interface" type="moveit_cpp_test" />
+</launch>
