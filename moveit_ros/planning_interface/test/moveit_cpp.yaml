@@ -15,4 +15,5 @@ default_planner_options:
   max_velocity_scaling_factor: 1.0
   max_acceleration_scaling_factor: 1.0
 
-moveit_controller_manager: "moveit_simple_controller_manager/MoveItSimpleControllerManager"
+#Set the param that trajectory_execution_manager needs to find the controller plugin
+moveit_controller_manager: "moveit_fake_controller_manager/MoveItFakeControllerManager"
