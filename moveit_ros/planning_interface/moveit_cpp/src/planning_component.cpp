@@ -73,7 +73,7 @@ constexpr char LOGNAME[] = "planning_component";
 PlanningComponent::PlanningComponent(const std::string& group_name, const MoveitCppPtr& moveit_context)
   : group_name_(group_name), nh_(moveit_context->getNodeHandle()), moveit_cpp_(moveit_context)
 {
-  joint_model_group_.reset(moveit_cpp_->getRobotModel()->getJointModelGroup(group_name));
+  joint_model_group_ = moveit_cpp_->getRobotModel()->getJointModelGroup(group_name);
   if (!joint_model_group_)
   {
     std::string error = "Could not find joint model group '" + group_name + "'.";
@@ -126,12 +126,12 @@ const std::string& PlanningComponent::getName() const
   return group_name_;
 }
 
-bool PlanningComponent::plan(const PlanRequestParameters& parameters)
+PlanningComponent::MoveItErrorCode PlanningComponent::plan(const PlanRequestParameters& parameters)
 {
   if (!joint_model_group_)
   {
     ROS_ERROR_NAMED(LOGNAME, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    return false;
+    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
   }
 
   // Clone current planning scene
@@ -165,7 +165,7 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
   if (current_goal_constraints_.empty())
   {
     ROS_ERROR_NAMED(LOGNAME, "No goal constraints set for planning request");
-    return false;
+    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
   }
   req.goal_constraints = current_goal_constraints_;
 
@@ -174,7 +174,7 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
   if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
   {
     ROS_ERROR_NAMED(LOGNAME, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    return false;
+    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
   }
   const planning_pipeline::PlanningPipelinePtr pipeline =
       moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
@@ -182,7 +182,7 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     ROS_ERROR("Could not compute plan successfully");
-    return false;
+    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
   }
   last_plan_solution_.reset(new PlanSolution());
   last_plan_solution_->start_state = req.start_state;
@@ -199,10 +199,10 @@ bool PlanningComponent::plan(const PlanRequestParameters& parameters)
   //    visual_tools_->publishRobotState(last_solution_trajectory_->getLastWayPoint(), rviz_visual_tools::TRANSLUCENT);
   //  }
   //}
-  return true;
+  return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::SUCCESS);
 }
 
-bool PlanningComponent::plan()
+PlanningComponent::MoveItErrorCode PlanningComponent::plan()
 {
   PlanRequestParameters default_parameters;
   default_parameters.planning_attempts = 1;
@@ -270,7 +270,7 @@ bool PlanningComponent::setGoal(const std::vector<moveit_msgs::Constraints>& goa
 
 bool PlanningComponent::setGoal(const robot_state::RobotState& goal_state)
 {
-  current_goal_constraints_ = { kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group_.get()) };
+  current_goal_constraints_ = { kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group_) };
   return true;
 }
 
@@ -296,7 +296,7 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
     return false;
   }
   robot_state::RobotState goal_state(moveit_cpp_->getRobotModel());
-  goal_state.setToDefaultValues(joint_model_group_.get(), goal_state_name);
+  goal_state.setToDefaultValues(joint_model_group_, goal_state_name);
   return setGoal(goal_state);
 }
 
@@ -319,12 +319,16 @@ bool PlanningComponent::execute(bool blocking)
   moveit_cpp_->execute(group_name_, last_plan_solution_->trajectory, blocking);
 }
 
+PlanningComponent::PlanSolutionPtr PlanningComponent::getLastPlanSolution()
+{
+  return last_plan_solution_;
+}
+
 void PlanningComponent::clearContents()
 {
   considered_start_state_.reset();
   last_plan_solution_.reset();
   current_goal_constraints_.clear();
-  joint_model_group_.reset();
   moveit_cpp_.reset();
   planning_pipeline_names_.clear();
 }

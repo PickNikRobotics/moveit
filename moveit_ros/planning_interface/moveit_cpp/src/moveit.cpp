@@ -147,12 +147,10 @@ bool MoveitCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt)
   ros::Duration(0.5).sleep();  // when at 0.1, i believe sometimes vjoint not properly loaded
 
   // Wait for complete state to be recieved
-  // TODO(henningkayser): parameterize
-  double wait_for_complete_state_timeout = 10.0;
-  // Break early
-  if (wait_for_complete_state_timeout > 0.0)
+  if (opt.wait_for_initial_state_timeout > 0.0)
   {
-    return planning_scene_monitor_->getStateMonitor()->waitForCurrentState();
+    return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(ros::Time::now(),
+                                                                           opt.wait_for_initial_state_timeout);
   }
 
   return true;

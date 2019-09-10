@@ -68,6 +68,7 @@ public:
                planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC);
       nh.param(ns + "publish_planning_scene_topic", publish_planning_scene_topic,
                planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
+      nh.param<double>(ns + "wait_for_initial_state_timeout", wait_for_initial_state_timeout, 0.0);
     };
     std::string name;
     std::string robot_description;
@@ -75,6 +76,7 @@ public:
     std::string attached_collision_object_topic;
     std::string monitored_planning_scene_topic;
     std::string publish_planning_scene_topic;
+    double wait_for_initial_state_timeout;
   };
   struct PlanningPipelineOptions
   {
