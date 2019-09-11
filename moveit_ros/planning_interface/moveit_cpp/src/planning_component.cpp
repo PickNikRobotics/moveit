@@ -73,7 +73,7 @@ constexpr char LOGNAME[] = "planning_component";
 PlanningComponent::PlanningComponent(const std::string& group_name, const MoveitCppPtr& moveit_context)
   : group_name_(group_name), nh_(moveit_context->getNodeHandle()), moveit_cpp_(moveit_context)
 {
-  joint_model_group_.reset(moveit_cpp_->getRobotModel()->getJointModelGroup(group_name));
+  joint_model_group_ = moveit_cpp_->getRobotModel()->getJointModelGroup(group_name);
   if (!joint_model_group_)
   {
     std::string error = "Could not find joint model group '" + group_name + "'.";
@@ -270,7 +270,7 @@ bool PlanningComponent::setGoal(const std::vector<moveit_msgs::Constraints>& goa
 
 bool PlanningComponent::setGoal(const robot_state::RobotState& goal_state)
 {
-  current_goal_constraints_ = { kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group_.get()) };
+  current_goal_constraints_ = { kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group_) };
   return true;
 }
 
@@ -296,7 +296,7 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
     return false;
   }
   robot_state::RobotState goal_state(moveit_cpp_->getRobotModel());
-  goal_state.setToDefaultValues(joint_model_group_.get(), goal_state_name);
+  goal_state.setToDefaultValues(joint_model_group_, goal_state_name);
   return setGoal(goal_state);
 }
 
@@ -324,7 +324,6 @@ void PlanningComponent::clearContents()
   considered_start_state_.reset();
   last_plan_solution_.reset();
   current_goal_constraints_.clear();
-  joint_model_group_.reset();
   moveit_cpp_.reset();
   planning_pipeline_names_.clear();
 }

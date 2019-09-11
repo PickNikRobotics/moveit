@@ -147,7 +147,7 @@ private:
   ros::NodeHandle nh_;
   MoveitCppPtr moveit_cpp_;
   const std::string group_name_;
-  moveit::core::JointModelGroupConstPtr joint_model_group_;
+  const moveit::core::JointModelGroup* joint_model_group_;
 
   // Planning
   std::set<std::string> planning_pipeline_names_;
