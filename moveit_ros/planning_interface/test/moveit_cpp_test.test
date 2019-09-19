@@ -5,7 +5,7 @@
     <!-- Planning Pipeline -->
     <include ns="/moveit_cpp_test/ompl" file="$(find panda_moveit_config)/launch/ompl_planning_pipeline.launch.xml"/>
     
-     <!-- Trajectory execution  -->
+    <!-- Trajectory execution  -->
     <!--include ns="moveit_cpp_test" file="$(find panda_moveit_config)/launch/trajectory_execution.launch.xml">
       <arg name="moveit_controller_manager" value="fake"/>
     </include-->
