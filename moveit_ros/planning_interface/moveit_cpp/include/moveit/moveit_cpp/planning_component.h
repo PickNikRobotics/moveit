@@ -188,6 +188,7 @@ private:
   ros::NodeHandle nh_;
   MoveitCppPtr moveit_cpp_;
   const std::string group_name_;
+  // The robot_model_ member variable of MoveItCpp class will manually free the joint_model_group_ resources
   const moveit::core::JointModelGroup* joint_model_group_;
 
   // Planning
