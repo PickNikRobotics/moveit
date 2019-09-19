@@ -92,6 +92,14 @@ public:
 
     /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
     robot_trajectory::RobotTrajectoryPtr trajectory;
+
+    /// Error code
+    MoveItErrorCode error_code;
+
+    explicit operator bool() const
+    {
+      return bool(error_code);
+    }
   };
 
   /// Planner parameters provided with the MotionPlanRequest
@@ -163,10 +171,10 @@ public:
 
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using
    * default parameters. */
-  MoveItErrorCode plan();
+  PlanSolution plan();
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using the
    * provided PlanRequestParameters. */
-  MoveItErrorCode plan(const PlanRequestParameters& parameters);
+  PlanSolution plan(const PlanRequestParameters& parameters);
 
   /** \brief Execute the latest computed solution trajectory computed by plan(). By default this function terminates
    * after the execution is complete. The execution can be run in background by setting blocking to false. */

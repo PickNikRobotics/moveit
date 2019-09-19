@@ -126,12 +126,14 @@ const std::string& PlanningComponent::getName() const
   return group_name_;
 }
 
-PlanningComponent::MoveItErrorCode PlanningComponent::plan(const PlanRequestParameters& parameters)
+PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParameters& parameters)
 {
+  last_plan_solution_.reset(new PlanSolution());
   if (!joint_model_group_)
   {
     ROS_ERROR_NAMED(LOGNAME, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    return *last_plan_solution_;
   }
 
   // Clone current planning scene
@@ -165,7 +167,8 @@ PlanningComponent::MoveItErrorCode PlanningComponent::plan(const PlanRequestPara
   if (current_goal_constraints_.empty())
   {
     ROS_ERROR_NAMED(LOGNAME, "No goal constraints set for planning request");
-    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    return *last_plan_solution_;
   }
   req.goal_constraints = current_goal_constraints_;
 
@@ -174,7 +177,8 @@ PlanningComponent::MoveItErrorCode PlanningComponent::plan(const PlanRequestPara
   if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
   {
     ROS_ERROR_NAMED(LOGNAME, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    return *last_plan_solution_;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline =
       moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
@@ -182,11 +186,12 @@ PlanningComponent::MoveItErrorCode PlanningComponent::plan(const PlanRequestPara
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     ROS_ERROR("Could not compute plan successfully");
-    return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    return *last_plan_solution_;
   }
-  last_plan_solution_.reset(new PlanSolution());
   last_plan_solution_->start_state = req.start_state;
   last_plan_solution_->trajectory = res.trajectory_;
+  last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::SUCCESS);
   // TODO(henningkayser): Visualize trajectory
   // std::vector<const moveit::core::LinkModel*> eef_links;
   // if (joint_model_group->getEndEffectorTips(eef_links))
@@ -199,10 +204,10 @@ PlanningComponent::MoveItErrorCode PlanningComponent::plan(const PlanRequestPara
   //    visual_tools_->publishRobotState(last_solution_trajectory_->getLastWayPoint(), rviz_visual_tools::TRANSLUCENT);
   //  }
   //}
-  return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::SUCCESS);
+  return *last_plan_solution_;
 }
 
-PlanningComponent::MoveItErrorCode PlanningComponent::plan()
+PlanningComponent::PlanSolution PlanningComponent::plan()
 {
   PlanRequestParameters default_parameters;
   default_parameters.planning_attempts = 1;
