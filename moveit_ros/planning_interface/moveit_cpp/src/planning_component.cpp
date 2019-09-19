@@ -324,7 +324,7 @@ bool PlanningComponent::execute(bool blocking)
   moveit_cpp_->execute(group_name_, last_plan_solution_->trajectory, blocking);
 }
 
-PlanningComponent::PlanSolutionPtr PlanningComponent::getLastPlanSolution()
+const PlanningComponent::PlanSolutionPtr PlanningComponent::getLastPlanSolution()
 {
   return last_plan_solution_;
 }

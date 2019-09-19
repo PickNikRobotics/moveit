@@ -181,7 +181,7 @@ public:
   bool execute(bool blocking = true);
 
   /** \brief Return the last plan solution*/
-  PlanSolutionPtr getLastPlanSolution();
+  const PlanSolutionPtr getLastPlanSolution();
 
 private:
   // Core properties and instances
