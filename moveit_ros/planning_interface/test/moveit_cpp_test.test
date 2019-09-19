@@ -1,5 +1,5 @@
 <launch>
-	<!-- Specify the config files to use -->
+    <!-- Specify the config files to use -->
     <rosparam ns="moveit_cpp_test" command="load" file="$(find moveit_ros_planning_interface)/test/moveit_cpp.yaml" />
 
     <!-- Planning Pipeline -->
