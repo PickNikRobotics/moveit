@@ -132,7 +132,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   if (!joint_model_group_)
   {
     ROS_ERROR_NAMED(LOGNAME, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME);
     return *last_plan_solution_;
   }
 
@@ -167,7 +167,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   if (current_goal_constraints_.empty())
   {
     ROS_ERROR_NAMED(LOGNAME, "No goal constraints set for planning request");
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
     return *last_plan_solution_;
   }
   req.goal_constraints = current_goal_constraints_;
@@ -183,15 +183,14 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   const planning_pipeline::PlanningPipelinePtr pipeline =
       moveit_cpp_->getPlanningPipelines().at(parameters.planning_pipeline);
   pipeline->generatePlan(planning_scene, req, res);
+  last_plan_solution_->error_code = res.error_code_.val;
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
     ROS_ERROR("Could not compute plan successfully");
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
     return *last_plan_solution_;
   }
   last_plan_solution_->start_state = req.start_state;
   last_plan_solution_->trajectory = res.trajectory_;
-  last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::SUCCESS);
   // TODO(henningkayser): Visualize trajectory
   // std::vector<const moveit::core::LinkModel*> eef_links;
   // if (joint_model_group->getEndEffectorTips(eef_links))
