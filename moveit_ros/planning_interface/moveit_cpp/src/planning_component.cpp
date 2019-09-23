@@ -320,7 +320,7 @@ bool PlanningComponent::execute(bool blocking)
   //  ROS_ERROR("Failed to parameterize trajectory");
   //  return false;
   //}
-  moveit_cpp_->execute(group_name_, last_plan_solution_->trajectory, blocking);
+  return moveit_cpp_->execute(group_name_, last_plan_solution_->trajectory, blocking);
 }
 
 const PlanningComponent::PlanSolutionPtr PlanningComponent::getLastPlanSolution()
