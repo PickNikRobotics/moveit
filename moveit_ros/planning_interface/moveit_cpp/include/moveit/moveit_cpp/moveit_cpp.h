@@ -69,7 +69,7 @@ public:
       nh.param(ns + "publish_planning_scene_topic", publish_planning_scene_topic,
                planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
       nh.param<double>(ns + "wait_for_initial_state_timeout", wait_for_initial_state_timeout, 0.0);
-    };
+    }
     std::string name;
     std::string robot_description;
     std::string joint_state_topic;
@@ -85,7 +85,7 @@ public:
       std::string ns = "planning_pipelines/";
       nh.getParam(ns + "pipeline_names", pipeline_names);
       nh.getParam(ns + "namespace", parent_namespace);
-    };
+    }
     std::vector<std::string> pipeline_names;
     std::string parent_namespace;
   };
@@ -97,7 +97,7 @@ public:
       nh.getParam(ns + "planning_attempts", planning_attempts);
       nh.getParam(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor);
       nh.getParam(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor);
-    };
+    }
     int planning_attempts;
     double planning_time;
     double max_velocity_scaling_factor;
