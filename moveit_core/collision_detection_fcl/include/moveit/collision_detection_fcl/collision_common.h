@@ -204,21 +204,24 @@ struct FCLGeometry
 
   /** \brief Constructor for a robot link. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const robot_model::LinkModel* link, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(link, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(link, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 
   /** \brief Constructor for an attached body. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const robot_state::AttachedBody* ab, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(ab, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(ab, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 
   /** \brief Constructor for a world object. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const World::Object* obj, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(obj, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(obj, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
@@ -231,7 +234,7 @@ struct FCLGeometry
     if (!newType && collision_geometry_data_)
       if (collision_geometry_data_->ptr.raw == reinterpret_cast<const void*>(data))
         return;
-    collision_geometry_data_.reset(new CollisionGeometryData(data, shape_index));
+    collision_geometry_data_ = std::make_shared<CollisionGeometryData>(data, shape_index);
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 

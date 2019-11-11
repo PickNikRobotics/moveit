@@ -59,9 +59,9 @@ protected:
     robot_model_ok_ = static_cast<bool>(robot_model_);
     kinect_dae_resource_ = "package://moveit_resources/pr2_description/urdf/meshes/sensors/kinect_v0/kinect.dae";
 
-    acm_.reset(new collision_detection::AllowedCollisionMatrix(robot_model_->getLinkModelNames(), true));
+    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(robot_model_->getLinkModelNames(), true);
 
-    c_env_.reset(new DefaultEnvType(robot_model_));
+    c_env_ = std::make_shared<DefaultEnvType>(robot_model_);
   }
 
   void TearDown() override
@@ -186,7 +186,7 @@ TEST_F(FclCollisionDetectionTester, ContactReporting)
 
   req.max_contacts = 10;
   req.max_contacts_per_pair = 2;
-  acm_.reset(new collision_detection::AllowedCollisionMatrix(robot_model_->getLinkModelNames(), false));
+  acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(robot_model_->getLinkModelNames(), false);
   c_env_->checkSelfCollision(req, res, robot_state, *acm_);
   ASSERT_TRUE(res.collision);
   EXPECT_LE(res.contacts.size(), 10u);
@@ -267,7 +267,7 @@ TEST_F(FclCollisionDetectionTester, AttachedBodyTester)
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
 
-  acm_.reset(new collision_detection::AllowedCollisionMatrix(robot_model_->getLinkModelNames(), true));
+  acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(robot_model_->getLinkModelNames(), true);
 
   robot_state::RobotState robot_state(robot_model_);
   robot_state.setToDefaultValues();
@@ -309,7 +309,7 @@ TEST_F(FclCollisionDetectionTester, AttachedBodyTester)
 
   touch_links.push_back("r_gripper_palm_link");
   touch_links.push_back("r_gripper_motor_accelerometer_link");
-  shapes[0].reset(new shapes::Box(.1, .1, .1));
+  shapes[0] = std::make_shared<shapes::Box>(.1, .1, .1);
   robot_state.attachBody("box", shapes, poses, touch_links, "r_gripper_palm_link");
   robot_state.update();
 

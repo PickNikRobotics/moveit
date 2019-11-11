@@ -44,11 +44,11 @@ TEST(AllValid, Instantiate)
   CollisionDetectorAllocatorAllValid allocator;
 
   urdf::ModelInterfaceSharedPtr urdf_model;
-  urdf_model.reset(new urdf::ModelInterface());
+  urdf_model = std::make_shared<urdf::ModelInterface>();
   srdf::ModelConstSharedPtr srdf_model;
-  srdf_model.reset(new srdf::Model());
+  srdf_model = std::make_shared<srdf::Model>();
   robot_model::RobotModelConstPtr robot_model;
-  robot_model.reset(new robot_model::RobotModel(urdf_model, srdf_model));
+  robot_model = std::make_shared<robot_model::RobotModel>(urdf_model, srdf_model);
   CollisionEnvAllValid env(robot_model);
 }
 
