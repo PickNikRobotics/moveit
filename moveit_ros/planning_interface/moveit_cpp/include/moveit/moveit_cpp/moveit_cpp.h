@@ -32,7 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Henning Kayser */
+/* Author: Henning Kayser
+   Desc: A high level interface that does not require the use of ROS Actions, Services, and Messages to access the
+   core MoveIt functionality
+*/
 
 #pragma once
 
