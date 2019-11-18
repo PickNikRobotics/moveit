@@ -208,13 +208,11 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 
 robot_model::RobotModelConstPtr MoveItCpp::getRobotModel() const
 {
-  ROS_DEBUG_NAMED(LOGNAME, "MoveItCpp::getRobotModel()");
   return robot_model_;
 }
 
 const ros::NodeHandle& MoveItCpp::getNodeHandle() const
 {
-  ROS_DEBUG_NAMED(LOGNAME, "MoveItCpp::getNodeHandle()");
   return node_handle_;
 }
 
