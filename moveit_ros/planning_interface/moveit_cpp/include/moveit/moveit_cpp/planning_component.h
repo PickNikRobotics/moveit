@@ -74,13 +74,13 @@ public:
     {
       return val == moveit_msgs::MoveItErrorCodes::SUCCESS;
     }
-    bool operator==(const int c) const
+    bool operator==(const int code) const
     {
-      return val == c;
+      return val == code;
     }
-    bool operator!=(const int c) const
+    bool operator!=(const int code) const
     {
-      return val != c;
+      return val != code;
     }
   };
 
