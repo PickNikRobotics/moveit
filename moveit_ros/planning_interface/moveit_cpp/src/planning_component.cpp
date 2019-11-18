@@ -121,7 +121,7 @@ const std::vector<std::string> PlanningComponent::getNamedTargets()
   return empty;
 }
 
-const std::string& PlanningComponent::getName() const
+const std::string& PlanningComponent::getPlanningGroupName() const
 {
   return group_name_;
 }

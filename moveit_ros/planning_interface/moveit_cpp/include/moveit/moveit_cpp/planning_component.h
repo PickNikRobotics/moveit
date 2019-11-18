@@ -132,7 +132,7 @@ public:
   ~PlanningComponent();
 
   /** \brief Get the name of the planning group */
-  const std::string& getName() const;
+  const std::string& getPlanningGroupName() const;
 
   /** \brief Get the names of the named robot states available as targets */
   const std::vector<std::string> getNamedTargets();
