@@ -115,7 +115,7 @@ public:
 
   /** \brief Constructor */
   PlanningComponent(const std::string& group_name, const ros::NodeHandle& nh);
-  PlanningComponent(const std::string& group_name, const MoveItCppPtr& moveit_context);
+  PlanningComponent(const std::string& group_name, const MoveItCppPtr& moveit_cpp);
 
   /**
    * @brief This class owns unique resources (e.g. action clients, threads) and its not very
