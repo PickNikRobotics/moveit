@@ -94,20 +94,6 @@ public:
     std::vector<std::string> pipeline_names;
     std::string parent_namespace;
   };
-  struct PlannerOptions
-  {
-    void load(const ros::NodeHandle& nh)
-    {
-      std::string ns = "default_planner_options/";
-      nh.getParam(ns + "planning_attempts", planning_attempts);
-      nh.getParam(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor);
-      nh.getParam(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor);
-    }
-    int planning_attempts;
-    double planning_time;
-    double max_velocity_scaling_factor;
-    double max_acceleration_scaling_factor;
-  };
 
   /// Parameter container for initializing MoveItCpp
   struct Options
@@ -115,13 +101,11 @@ public:
     Options(const ros::NodeHandle& nh)
     {
       planning_scene_monitor_options.load(nh);
-      default_planner_options.load(nh);
       planning_pipeline_options.load(nh);
     }
 
     PlanningSceneMonitorOptions planning_scene_monitor_options;
     PlanningPipelineOptions planning_pipeline_options;
-    PlannerOptions default_planner_options;
   };
 
   /** \brief Constructor */
