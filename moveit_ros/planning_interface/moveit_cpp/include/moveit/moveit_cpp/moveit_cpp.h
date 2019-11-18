@@ -169,7 +169,6 @@ protected:
 private:
   //  Core properties and instances
   ros::NodeHandle node_handle_;
-  std::string robot_description_;
   robot_model::RobotModelConstPtr robot_model_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 

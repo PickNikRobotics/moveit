@@ -112,7 +112,6 @@ MoveItCpp& MoveItCpp::operator=(MoveItCpp&& other)
 {
   if (this != &other)
   {
-    this->robot_description_ = other.robot_description_;
     this->node_handle_ = other.node_handle_;
     this->tf_buffer_ = other.tf_buffer_;
     this->robot_model_ = other.robot_model_;
@@ -324,7 +323,6 @@ const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
 
 void MoveItCpp::clearContents()
 {
-  robot_description_.clear();
   tf_buffer_.reset();
   planning_scene_monitor_.reset();
   robot_model_.reset();
