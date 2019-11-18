@@ -81,6 +81,8 @@ public:
     std::string publish_planning_scene_topic;
     double wait_for_initial_state_timeout;
   };
+
+  /// struct contains the the variables used for loading the planning pipeline
   struct PlanningPipelineOptions
   {
     void load(const ros::NodeHandle& nh)
