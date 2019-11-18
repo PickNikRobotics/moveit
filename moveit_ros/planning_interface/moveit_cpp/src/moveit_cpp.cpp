@@ -58,14 +58,15 @@ MoveItCpp::MoveItCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::B
 {
 }
 
-MoveItCpp::MoveItCpp(const Options& opt, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+MoveItCpp::MoveItCpp(const Options& options, const ros::NodeHandle& nh,
+                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
 {
   if (!tf_buffer_)
     tf_buffer_.reset(new tf2_ros::Buffer());
   tf_listener_.reset(new tf2_ros::TransformListener(*tf_buffer_));
 
   // Configure planning scene monitor
-  if (!loadPlanningSceneMonitor(opt.planning_scene_monitor_options))
+  if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
   {
     std::string error = "Unable to configure planning scene monitor";
     ROS_FATAL_STREAM_NAMED(LOGNAME, error);
@@ -82,7 +83,7 @@ MoveItCpp::MoveItCpp(const Options& opt, const ros::NodeHandle& nh, const std::s
   }
 
   bool load_planning_pipelines = true;
-  if (load_planning_pipelines && !loadPlanningPipelines(opt.planning_pipeline_options))
+  if (load_planning_pipelines && !loadPlanningPipelines(options.planning_pipeline_options))
   {
     std::string error = "Failed to load planning pipelines from parameter server";
     ROS_FATAL_STREAM_NAMED(LOGNAME, error);
@@ -122,20 +123,20 @@ MoveItCpp& MoveItCpp::operator=(MoveItCpp&& other)
   return *this;
 }
 
-bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt)
+bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
 {
   planning_scene_monitor_.reset(
-      new planning_scene_monitor::PlanningSceneMonitor(opt.robot_description, tf_buffer_, opt.name));
+      new planning_scene_monitor::PlanningSceneMonitor(options.robot_description, tf_buffer_, options.name));
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   ROS_DEBUG_STREAM_NAMED(LOGNAME, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
   {
     // Start state and scene monitors
-    ROS_INFO_NAMED(LOGNAME, "Listening to '%s' for joint states", opt.joint_state_topic.c_str());
-    planning_scene_monitor_->startStateMonitor(opt.joint_state_topic, opt.attached_collision_object_topic);
+    ROS_INFO_NAMED(LOGNAME, "Listening to '%s' for joint states", options.joint_state_topic.c_str());
+    planning_scene_monitor_->startStateMonitor(options.joint_state_topic, options.attached_collision_object_topic);
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                          opt.publish_planning_scene_topic);
-    planning_scene_monitor_->startSceneMonitor(opt.monitored_planning_scene_topic);
+                                                          options.publish_planning_scene_topic);
+    planning_scene_monitor_->startSceneMonitor(options.monitored_planning_scene_topic);
   }
   else
   {
@@ -147,19 +148,19 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt)
   ros::Duration(0.5).sleep();  // when at 0.1, i believe sometimes vjoint not properly loaded
 
   // Wait for complete state to be recieved
-  if (opt.wait_for_initial_state_timeout > 0.0)
+  if (options.wait_for_initial_state_timeout > 0.0)
   {
     return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(ros::Time::now(),
-                                                                           opt.wait_for_initial_state_timeout);
+                                                                           options.wait_for_initial_state_timeout);
   }
 
   return true;
 }
 
-bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& opt)
+bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 {
-  ros::NodeHandle node_handle(opt.parent_namespace.empty() ? "~" : opt.parent_namespace);
-  for (const auto& planning_pipeline_name : opt.pipeline_names)
+  ros::NodeHandle node_handle(options.parent_namespace.empty() ? "~" : options.parent_namespace);
+  for (const auto& planning_pipeline_name : options.pipeline_names)
   {
     if (planning_pipelines_.count(planning_pipeline_name) > 0)
     {

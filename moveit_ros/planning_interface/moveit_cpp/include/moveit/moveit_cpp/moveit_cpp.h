@@ -110,7 +110,7 @@ public:
 
   /** \brief Constructor */
   MoveItCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
-  MoveItCpp(const Options& opt, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
+  MoveItCpp(const Options& options, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
 
   /**
    * @brief This class owns unique resources (e.g. action clients, threads) and its not very
@@ -183,10 +183,10 @@ private:
   void clearContents();
 
   /** \brief Initialize and setup the planning scene monitor */
-  bool loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opt);
+  bool loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options);
 
   /** \brief Initialize and setup the planning pipelines */
-  bool loadPlanningPipelines(const PlanningPipelineOptions& opt);
+  bool loadPlanningPipelines(const PlanningPipelineOptions& options);
 };
 }  // namespace planning_interface
 }  // namespace moveit
