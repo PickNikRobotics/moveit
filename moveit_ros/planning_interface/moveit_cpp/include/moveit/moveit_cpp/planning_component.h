@@ -93,7 +93,7 @@ public:
     /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
     robot_trajectory::RobotTrajectoryPtr trajectory;
 
-    /// Error code
+    /// Reason why the plan failed
     MoveItErrorCode error_code;
 
     explicit operator bool() const
