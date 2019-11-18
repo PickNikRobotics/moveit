@@ -68,7 +68,7 @@ MoveItCpp::MoveItCpp(const Options& options, const ros::NodeHandle& nh,
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
   {
-    std::string error = "Unable to configure planning scene monitor";
+    const std::string error = "Unable to configure planning scene monitor";
     ROS_FATAL_STREAM_NAMED(LOGNAME, error);
     throw std::runtime_error(error);
   }
@@ -76,8 +76,8 @@ MoveItCpp::MoveItCpp(const Options& options, const ros::NodeHandle& nh,
   robot_model_ = planning_scene_monitor_->getRobotModel();
   if (!robot_model_)
   {
-    std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
-                        "parameter server.";
+    const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
+                              "parameter server.";
     ROS_FATAL_STREAM_NAMED(LOGNAME, error);
     throw std::runtime_error(error);
   }
@@ -85,7 +85,7 @@ MoveItCpp::MoveItCpp(const Options& options, const ros::NodeHandle& nh,
   bool load_planning_pipelines = true;
   if (load_planning_pipelines && !loadPlanningPipelines(options.planning_pipeline_options))
   {
-    std::string error = "Failed to load planning pipelines from parameter server";
+    const std::string error = "Failed to load planning pipelines from parameter server";
     ROS_FATAL_STREAM_NAMED(LOGNAME, error);
     throw std::runtime_error(error);
   }
