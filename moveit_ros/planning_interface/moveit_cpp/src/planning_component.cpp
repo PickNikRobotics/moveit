@@ -254,7 +254,7 @@ void PlanningComponent::setStartStateToCurrentState()
   considered_start_state_.reset();
 }
 
-std::map<std::string, double> PlanningComponent::getNamedTargetValues(const std::string& name)
+std::map<std::string, double> PlanningComponent::getNamedTargetStateValues(const std::string& name)
 {
   // TODO(henningkayser): verify result
   std::map<std::string, double> positions;

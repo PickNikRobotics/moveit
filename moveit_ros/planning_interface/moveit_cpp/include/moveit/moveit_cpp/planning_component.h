@@ -138,7 +138,7 @@ public:
   const std::vector<std::string> getNamedTargetStates();
 
   /** \brief Get the joint values for targets specified by name */
-  std::map<std::string, double> getNamedTargetValues(const std::string& name);
+  std::map<std::string, double> getNamedTargetStateValues(const std::string& name);
 
   /** \brief Specify the workspace bounding box.
        The box is specified in the planning frame (i.e. relative to the robot root link start position).
