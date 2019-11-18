@@ -106,7 +106,7 @@ PlanningComponent& PlanningComponent::operator=(PlanningComponent&& other)
   return *this;
 }
 
-const std::vector<std::string> PlanningComponent::getNamedTargets()
+const std::vector<std::string> PlanningComponent::getNamedTargetStates()
 {
   if (joint_model_group_)
   {
@@ -238,7 +238,7 @@ robot_state::RobotStatePtr PlanningComponent::getStartState()
 
 bool PlanningComponent::setStartState(const std::string& start_state_name)
 {
-  const auto& named_targets = getNamedTargets();
+  const auto& named_targets = getNamedTargetStates();
   if (std::find(named_targets.begin(), named_targets.end(), start_state_name) == named_targets.end())
   {
     ROS_ERROR_NAMED(LOGNAME, "No predefined joint state found for target name '%s'", start_state_name.c_str());
@@ -307,7 +307,7 @@ bool PlanningComponent::setGoal(const geometry_msgs::PoseStamped& goal_pose, con
 
 bool PlanningComponent::setGoal(const std::string& goal_state_name)
 {
-  const auto& named_targets = getNamedTargets();
+  const auto& named_targets = getNamedTargetStates();
   if (std::find(named_targets.begin(), named_targets.end(), goal_state_name) == named_targets.end())
   {
     ROS_ERROR_NAMED(LOGNAME, "No predefined joint state found for target name '%s'", goal_state_name.c_str());

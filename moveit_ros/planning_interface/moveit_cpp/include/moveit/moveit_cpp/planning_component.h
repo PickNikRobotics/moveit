@@ -135,7 +135,7 @@ public:
   const std::string& getPlanningGroupName() const;
 
   /** \brief Get the names of the named robot states available as targets */
-  const std::vector<std::string> getNamedTargets();
+  const std::vector<std::string> getNamedTargetStates();
 
   /** \brief Get the joint values for targets specified by name */
   std::map<std::string, double> getNamedTargetValues(const std::string& name);
