@@ -270,6 +270,7 @@ const planning_scene_monitor::PlanningSceneMonitorPtr& MoveItCpp::getPlanningSce
 {
   return planning_scene_monitor_;
 }
+
 planning_scene_monitor::PlanningSceneMonitorPtr MoveItCpp::getPlanningSceneMonitorNonConst()
 {
   return planning_scene_monitor_;
