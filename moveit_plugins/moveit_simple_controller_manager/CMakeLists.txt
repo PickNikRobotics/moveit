@@ -16,12 +16,19 @@ find_package(catkin COMPONENTS
   actionlib
   roscpp
   control_msgs
+  trackjoint
   REQUIRED)
 
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(
+  include
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
 
 catkin_package(
-  LIBRARIES ${PROJECT_NAME}
+  LIBRARIES
+    ${PROJECT_NAME}
+    trackjoint
   INCLUDE_DIRS include
   CATKIN_DEPENDS moveit_core actionlib control_msgs
 )
@@ -31,7 +38,11 @@ add_library(${PROJECT_NAME}
   src/follow_joint_trajectory_controller_handle.cpp
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  trackjoint
+)
 
 install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

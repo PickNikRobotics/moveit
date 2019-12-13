@@ -38,6 +38,10 @@
 #include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
 #include <moveit/utils/xmlrpc_casts.h>
 
+// Trackjoint
+#include <std_msgs/Float64MultiArray.h>
+#include <trackjoint/trajectory_generator.h>
+
 using namespace moveit::core;
 static const std::string LOGNAME("SimpleControllerManager");
 
@@ -62,8 +66,131 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
 
   control_msgs::FollowJointTrajectoryGoal goal = goal_template_;
   goal.trajectory = trajectory.joint_trajectory;
+
+  ////////////////////////////////////////
+  // Smooth the trajectory with TrackJoint
+  ////////////////////////////////////////
+  const int kNumDof = 6;
+  const double kMaxDuration = 10;
+  const double kTimestep = 0.008;
+
+  std::vector<trackjoint::Limits> limits(kNumDof);
+  trackjoint::Limits single_joint_limits;
+  single_joint_limits.velocity_limit = 0.5;
+  single_joint_limits.acceleration_limit = 100;
+  single_joint_limits.jerk_limit = 1000;
+  limits[0] = single_joint_limits;
+  limits[1] = single_joint_limits;
+  limits[2] = single_joint_limits;
+  limits[3] = single_joint_limits;
+  limits[4] = single_joint_limits;
+  limits[5] = single_joint_limits;
+
+  ////////////////////////////////////////////////
+  // Get TrackJoint initial states and goal states
+  ////////////////////////////////////////////////
+
+  // Vector of start states - for each waypoint, for each joint
+  std::vector<std::vector<trackjoint::KinematicState>> trackjt_current_joint_states;
+  // Vector of goal states - for each waypoint, for each joint
+  std::vector<std::vector<trackjoint::KinematicState>> trackjt_goal_joint_states;
+
+  std::vector<double> trackjt_desired_durations;
+
+  trackjoint::KinematicState joint_state;
+
+  // For each MoveIt waypoint
+  for (std::size_t point = 0; point<goal.trajectory.points.size()-1; ++point)
+  {
+    std::vector<trackjoint::KinematicState> current_joint_states;
+    std::vector<trackjoint::KinematicState> goal_joint_states;
+
+    // for each joint
+    for (std::size_t joint = 0; joint<kNumDof; ++joint)
+    {
+      // Save the start state of the robot
+      joint_state.position = goal.trajectory.points[point].positions[joint];
+      joint_state.velocity = goal.trajectory.points[point].velocities[joint];
+      joint_state.acceleration = goal.trajectory.points[point].accelerations[joint];
+
+      current_joint_states.push_back(joint_state);
+
+      // Save the goal state of the robot
+      joint_state.position = goal.trajectory.points[point+1].positions[joint];
+      joint_state.velocity = goal.trajectory.points[point+1].velocities[joint];
+      joint_state.acceleration = goal.trajectory.points[point+1].accelerations[joint];
+
+      goal_joint_states.push_back(joint_state);
+    }
+    trackjt_current_joint_states.push_back(current_joint_states);
+    trackjt_goal_joint_states.push_back(goal_joint_states);
+
+    trackjt_desired_durations.push_back( goal.trajectory.points[point+1].time_from_start.toSec() - goal.trajectory.points[point].time_from_start.toSec() );
+  }
+
+  ROS_WARN_STREAM("Num. waypoints: " << trackjt_desired_durations.size());
+
+  /////////////////
+  // Run TrackJoint
+  /////////////////
+
+  // Save the new trajectory in this message
+  control_msgs::FollowJointTrajectoryGoal smoothed_goal;
+  smoothed_goal.path_tolerance = goal.path_tolerance;
+  smoothed_goal.goal_tolerance = goal.goal_tolerance;
+  smoothed_goal.goal_tolerance = goal.goal_tolerance;
+  smoothed_goal.goal_time_tolerance = goal.goal_time_tolerance;
+  smoothed_goal.trajectory.header = goal.trajectory.header;
+  smoothed_goal.trajectory.joint_names = goal.trajectory.joint_names;
+
+  trackjoint::ErrorCodeEnum error_code = trackjoint::ErrorCodeEnum::kNoError;
+
+  // Step through the saved waypoints and smooth them with TrackJoint
+  for (std::size_t point=0; point<trackjt_desired_durations.size(); ++point)
+  {
+    trackjoint::TrajectoryGenerator traj_gen(kNumDof, kTimestep, trackjt_desired_durations[point],
+                                        kMaxDuration, trackjt_current_joint_states[point],
+                                        trackjt_goal_joint_states[point], limits);
+    std::vector<trackjoint::JointTrajectory> output_trajectories(kNumDof);
+
+    error_code = traj_gen.GenerateTrajectories(&output_trajectories);
+
+    std::cout << "Error code: " << trackjoint::kErrorCodeMap.at(error_code)
+          << std::endl;
+
+    // Save the smoothed trajectory
+    trajectory_msgs::JointTrajectoryPoint new_point;
+
+    std_msgs::Float64MultiArray new_positions;
+    new_positions.data.resize(kNumDof);
+
+    std_msgs::Float64MultiArray new_velocities;
+    new_velocities.data.resize(kNumDof);
+
+    std_msgs::Float64MultiArray new_accelerations;
+    new_accelerations.data.resize(kNumDof);
+
+    for (std::size_t smoothed_pt = 0; smoothed_pt<output_trajectories.at(0).elapsed_times.size(); ++smoothed_pt)
+    {
+      for (std::size_t joint = 0; joint<kNumDof; ++joint)
+      {
+        new_positions.data[joint] = output_trajectories.at(joint).positions(smoothed_pt);
+        new_velocities.data[joint] = output_trajectories.at(joint).velocities(smoothed_pt);
+        new_accelerations.data[joint] = output_trajectories.at(joint).accelerations(smoothed_pt);
+      }
+      new_point.positions = new_positions.data;
+      new_point.velocities = new_velocities.data;
+      new_point.accelerations = new_accelerations.data;
+      new_point.time_from_start = ros::Duration(output_trajectories.at(0).elapsed_times(smoothed_pt));
+      smoothed_goal.trajectory.points.push_back(new_point);
+    }
+  }
+
+  ////////////////
+  // Send the goal
+  ////////////////
   controller_action_client_->sendGoal(
-      goal, boost::bind(&FollowJointTrajectoryControllerHandle::controllerDoneCallback, this, _1, _2),
+      smoothed_goal, boost::bind(&FollowJointTrajectoryControllerHandle::controllerDoneCallback, this, _1, _2),
       boost::bind(&FollowJointTrajectoryControllerHandle::controllerActiveCallback, this),
       boost::bind(&FollowJointTrajectoryControllerHandle::controllerFeedbackCallback, this, _1));
   done_ = false;
@@ -214,7 +341,7 @@ void FollowJointTrajectoryControllerHandle::controllerActiveCallback()
 }
 
 void FollowJointTrajectoryControllerHandle::controllerFeedbackCallback(
-    const control_msgs::FollowJointTrajectoryFeedbackConstPtr& feedback)
+    const control_msgs::FollowJointTrajectoryFeedbackConstPtr& /* feedback */)
 {
 }
 
