@@ -72,13 +72,13 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   ////////////////////////////////////////
   const int kNumDof = 6;
   const double kMaxDuration = 10;
-  const double kTimestep = 0.008;
+  const double kTimestep = 0.0075;
 
   std::vector<trackjoint::Limits> limits(kNumDof);
   trackjoint::Limits single_joint_limits;
   single_joint_limits.velocity_limit = 0.5;
-  single_joint_limits.acceleration_limit = 100;
-  single_joint_limits.jerk_limit = 1000;
+  single_joint_limits.acceleration_limit = 2;
+  single_joint_limits.jerk_limit = 100;
   limits[0] = single_joint_limits;
   limits[1] = single_joint_limits;
   limits[2] = single_joint_limits;
@@ -128,7 +128,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
     trackjt_desired_durations.push_back( goal.trajectory.points[point+1].time_from_start.toSec() - goal.trajectory.points[point].time_from_start.toSec() );
   }
 
-  ROS_WARN_STREAM("Num. waypoints: " << trackjt_desired_durations.size());
+  ROS_WARN_STREAM("MoveIt's original num. waypoints: " << trackjt_desired_durations.size());
 
   /////////////////
   // Run TrackJoint
@@ -144,6 +144,8 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   smoothed_goal.trajectory.joint_names = goal.trajectory.joint_names;
 
   trackjoint::ErrorCodeEnum error_code = trackjoint::ErrorCodeEnum::kNoError;
+
+  double waypoint_start_time = 0;
 
   // Step through the saved waypoints and smooth them with TrackJoint
   for (std::size_t point=0; point<trackjt_desired_durations.size(); ++point)
@@ -178,12 +180,14 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
         new_velocities.data[joint] = output_trajectories.at(joint).velocities(smoothed_pt);
         new_accelerations.data[joint] = output_trajectories.at(joint).accelerations(smoothed_pt);
       }
+
       new_point.positions = new_positions.data;
       new_point.velocities = new_velocities.data;
       new_point.accelerations = new_accelerations.data;
-      new_point.time_from_start = ros::Duration(output_trajectories.at(0).elapsed_times(smoothed_pt));
+      new_point.time_from_start = ros::Duration(waypoint_start_time + output_trajectories.at(0).elapsed_times(smoothed_pt));
       smoothed_goal.trajectory.points.push_back(new_point);
     }
+    waypoint_start_time = new_point.time_from_start.toSec() + kTimestep;
   }
 
   ////////////////
