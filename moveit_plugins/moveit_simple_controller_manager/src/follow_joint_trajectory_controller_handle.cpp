@@ -76,9 +76,9 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
 
   std::vector<trackjoint::Limits> limits(kNumDof);
   trackjoint::Limits single_joint_limits;
-  single_joint_limits.velocity_limit = 0.5;
-  single_joint_limits.acceleration_limit = 2;
-  single_joint_limits.jerk_limit = 100;
+  single_joint_limits.velocity_limit = 3.15;  // To match value in joint_limits.yaml
+  single_joint_limits.acceleration_limit = 5;
+  single_joint_limits.jerk_limit = 500;
   limits[0] = single_joint_limits;
   limits[1] = single_joint_limits;
   limits[2] = single_joint_limits;
@@ -159,6 +159,35 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
 
     std::cout << "Error code: " << trackjoint::kErrorCodeMap.at(error_code)
           << std::endl;
+    // Debug output, if failure
+    if (error_code != trackjoint::ErrorCodeEnum::kNoError)
+    {
+      std::cout << "===" << std::endl;
+      std::cout << "Failing conditions: " << std::endl;
+      std::cout << "Timestep: " << kTimestep << std::endl;
+      std::cout << "Desired duration: " << trackjt_desired_durations[point] << std::endl;
+      std::cout << "Max duration: " << kMaxDuration << std::endl;
+      std::cout << "Current joint positions / velocities / accelerations:" << std::endl;
+      for (std::size_t joint = 0; joint<kNumDof; ++joint)
+      {
+        std::cout << trackjt_current_joint_states[point][joint].position
+        << "  " << trackjt_current_joint_states[point][joint].velocity
+        << "  " << trackjt_current_joint_states[point][joint].acceleration
+        << std::endl;
+      }
+      std::cout << "Goal joint positions / velocities / accelerations:" << std::endl;
+      for (std::size_t joint = 0; joint<kNumDof; ++joint)
+      {
+        std::cout << trackjt_goal_joint_states[point][joint].position
+        << "  " << trackjt_goal_joint_states[point][joint].velocity
+        << "  " << trackjt_goal_joint_states[point][joint].acceleration
+        << std::endl;
+      }
+      std::cout << "Velocity limit: " << limits[0].velocity_limit << std::endl;
+      std::cout << "Acceleration limit: " << limits[0].acceleration_limit << std::endl;
+      std::cout << "Jerk limit: " << limits[0].jerk_limit << std::endl;
+      std::cout << "===" << std::endl;
+    }
 
     // Save the smoothed trajectory
     trajectory_msgs::JointTrajectoryPoint new_point;
