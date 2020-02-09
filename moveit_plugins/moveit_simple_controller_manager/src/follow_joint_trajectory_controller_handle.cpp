@@ -70,9 +70,10 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   ////////////////////////////////////////
   // Smooth the trajectory with TrackJoint
   ////////////////////////////////////////
-  const int kNumDof = 6;
-  const double kMaxDuration = 10;
-  const double kTimestep = 0.0075;
+  constexpr int kNumDof = 6;
+  constexpr double kMaxDuration = 10;
+  constexpr double kTimestep = 0.0075;
+  constexpr double kPositionTolerance = 1e-6;
 
   std::vector<trackjoint::Limits> limits(kNumDof);
   trackjoint::Limits single_joint_limits;
@@ -152,7 +153,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   {
     trackjoint::TrajectoryGenerator traj_gen(kNumDof, kTimestep, trackjt_desired_durations[point],
                                         kMaxDuration, trackjt_current_joint_states[point],
-                                        trackjt_goal_joint_states[point], limits);
+                                        trackjt_goal_joint_states[point], limits, kPositionTolerance);
     std::vector<trackjoint::JointTrajectory> output_trajectories(kNumDof);
 
     error_code = traj_gen.GenerateTrajectories(&output_trajectories);

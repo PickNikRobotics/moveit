@@ -22,6 +22,7 @@
   <depend version_gte="1.11.2">pluginlib</depend>
   <depend>control_msgs</depend>
   <depend>actionlib</depend>
+  <depend>trackjoint</depend>
 
   <export>
     <moveit_core plugin="${prefix}/moveit_simple_controller_manager_plugin_description.xml"/>

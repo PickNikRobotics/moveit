@@ -8,6 +8,9 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# TODO(andyz): find trackjoint library automatically
+link_directories(/home/andyz/catkin_ws/devel/lib/)
+
 find_package(Boost REQUIRED thread)
 
 find_package(catkin COMPONENTS
@@ -30,7 +33,11 @@ catkin_package(
     ${PROJECT_NAME}
     trackjoint
   INCLUDE_DIRS include
-  CATKIN_DEPENDS moveit_core actionlib control_msgs
+  CATKIN_DEPENDS
+    moveit_core
+    actionlib
+    control_msgs
+    trackjoint
 )
 
 add_library(${PROJECT_NAME}
