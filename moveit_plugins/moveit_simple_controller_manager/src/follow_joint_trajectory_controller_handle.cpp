@@ -74,6 +74,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   constexpr double kMaxDuration = 30;
   constexpr double kTimestep = 0.0039;  // Slightly faster than 250 Hz
   constexpr double kPositionTolerance = 1e-6;
+  constexpr bool kUseHighSpeedMode = false;
 
   std::vector<trackjoint::Limits> limits(kNumDof);
   trackjoint::Limits single_joint_limits;
@@ -147,14 +148,15 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   trackjoint::ErrorCodeEnum error_code = trackjoint::ErrorCodeEnum::kNoError;
 
   double waypoint_start_time = 0;
+  std::vector<trackjoint::JointTrajectory> output_trajectories(kNumDof);
 
   // Step through the saved waypoints and smooth them with TrackJoint
   for (std::size_t point=0; point<trackjt_desired_durations.size(); ++point)
   {
     trackjoint::TrajectoryGenerator traj_gen(kNumDof, kTimestep, trackjt_desired_durations[point],
                                         kMaxDuration, trackjt_current_joint_states[point],
-                                        trackjt_goal_joint_states[point], limits, kPositionTolerance);
-    std::vector<trackjoint::JointTrajectory> output_trajectories(kNumDof);
+                                        trackjt_goal_joint_states[point], limits, kPositionTolerance,
+                                        kUseHighSpeedMode);
 
     error_code = traj_gen.GenerateTrajectories(&output_trajectories);
 
@@ -218,6 +220,9 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
       smoothed_goal.trajectory.points.push_back(new_point);
     }
     waypoint_start_time = new_point.time_from_start.toSec() + kTimestep;
+
+    // Save to file, for debugging
+    traj_gen.SaveTrajectoriesToFile(output_trajectories, "/home/andyz/Documents/" + std::to_string(point) + "_");
   }
 
   ////////////////
