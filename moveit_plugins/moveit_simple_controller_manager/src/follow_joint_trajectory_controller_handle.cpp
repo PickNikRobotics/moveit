@@ -158,7 +158,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
                                         trackjt_goal_joint_states[point], limits, kPositionTolerance,
                                         kUseHighSpeedMode);
 
-    error_code = traj_gen.GenerateTrajectories(&output_trajectories);
+    error_code = traj_gen.generateTrajectories(&output_trajectories);
 
     std::cout << "Error code: " << trackjoint::kErrorCodeMap.at(error_code)
           << std::endl;
@@ -222,7 +222,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
     waypoint_start_time = new_point.time_from_start.toSec() + kTimestep;
 
     // Save to file, for debugging
-    traj_gen.SaveTrajectoriesToFile(output_trajectories, "/home/andyz/Documents/" + std::to_string(point) + "_");
+    traj_gen.saveTrajectoriesToFile(output_trajectories, "/home/andyz/Documents/" + std::to_string(point) + "_");
   }
 
   ////////////////
