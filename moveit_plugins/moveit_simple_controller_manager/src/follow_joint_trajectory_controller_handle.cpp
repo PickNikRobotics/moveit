@@ -119,8 +119,9 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
 
       // Save the goal state of the robot
       joint_state.position = goal.trajectory.points[point+1].positions[joint];
-      joint_state.velocity = goal.trajectory.points[point+1].velocities[joint];
-      joint_state.acceleration = goal.trajectory.points[point+1].accelerations[joint];
+      // First-order velocity calculation (don't trust the MoveIt time parameterization)
+      joint_state.velocity = (goal.trajectory.points[point+1].positions[joint] - goal.trajectory.points[point].positions[joint]) / (goal.trajectory.points[point+1].time_from_start.toSec() - goal.trajectory.points[point].time_from_start.toSec());
+      joint_state.acceleration = 0; //goal.trajectory.points[point+1].accelerations[joint];
 
       goal_joint_states.push_back(joint_state);
     }
