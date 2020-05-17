@@ -42,6 +42,10 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <trackjoint/trajectory_generator.h>
 
+// For TrackJoint benchmarking
+#include <chrono>
+#include <ctime>
+
 using namespace moveit::core;
 static const std::string LOGNAME("SimpleControllerManager");
 
@@ -151,6 +155,11 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   double waypoint_start_time = 0;
   std::vector<trackjoint::JointTrajectory> output_trajectories(kNumDof);
 
+  // Start timer for performance benchmarking
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  size_t total_num_waypoints = 0;
+
   // Step through the saved waypoints and smooth them with TrackJoint
   for (std::size_t point=0; point<trackjt_desired_durations.size(); ++point)
   {
@@ -205,6 +214,8 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
     std_msgs::Float64MultiArray new_accelerations;
     new_accelerations.data.resize(kNumDof);
 
+    total_num_waypoints += output_trajectories.at(0).elapsed_times.size();
+
     for (std::size_t smoothed_pt = 0; smoothed_pt<output_trajectories.at(0).elapsed_times.size(); ++smoothed_pt)
     {
       for (std::size_t joint = 0; joint<kNumDof; ++joint)
@@ -223,8 +234,14 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
     waypoint_start_time = new_point.time_from_start.toSec() + kTimestep;
 
     // Save to file, for debugging
-    traj_gen.saveTrajectoriesToFile(output_trajectories, "/home/andyz/Documents/" + std::to_string(point) + "_");
+//    traj_gen.saveTrajectoriesToFile(output_trajectories, "/home/andyz/Documents/" + std::to_string(point) + "_");
   }
+
+  // A timer for benchmarking
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  ROS_INFO_STREAM("Trackjoint smoothing took " << time_span.count() << " seconds!");
+  ROS_INFO_STREAM("Total number of waypoints " << total_num_waypoints);
 
   ////////////////
   // Send the goal
