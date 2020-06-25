@@ -302,6 +302,8 @@ struct DistanceRequest
 /** \brief Generic representation of the distance information for a pair of objects */
 struct DistanceResultsData
 {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   DistanceResultsData()
   {
     clear();

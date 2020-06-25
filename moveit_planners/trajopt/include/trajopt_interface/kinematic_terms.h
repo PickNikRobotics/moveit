@@ -52,7 +52,7 @@ struct CartPoseErrCalculator : public sco::VectorOfVector
   Eigen::Isometry3d tcp_;
 
   CartPoseErrCalculator(const Eigen::Isometry3d& pose, const planning_scene::PlanningSceneConstPtr planning_scene,
-                        const std::string& link, Eigen::Isometry3d tcp = Eigen::Isometry3d::Identity())
+                        const std::string& link, const Eigen::Isometry3d& tcp = Eigen::Isometry3d::Identity())
     : target_pose_inv_(pose.inverse()), planning_scene_(planning_scene), link_(link), tcp_(tcp)
   {
   }
