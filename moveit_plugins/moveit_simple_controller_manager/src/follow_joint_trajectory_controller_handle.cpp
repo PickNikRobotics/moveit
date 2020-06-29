@@ -42,10 +42,6 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <trackjoint/trajectory_generator.h>
 
-// For TrackJoint benchmarking
-#include <chrono>
-#include <ctime>
-
 using namespace moveit::core;
 static const std::string LOGNAME("SimpleControllerManager");
 
@@ -123,9 +119,8 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
 
       // Save the goal state of the robot
       joint_state.position = goal.trajectory.points[point+1].positions[joint];
-      // First-order velocity calculation (don't trust the MoveIt time parameterization)
-      joint_state.velocity = (goal.trajectory.points[point+1].positions[joint] - goal.trajectory.points[point].positions[joint]) / (goal.trajectory.points[point+1].time_from_start.toSec() - goal.trajectory.points[point].time_from_start.toSec());
-      joint_state.acceleration = 0; //goal.trajectory.points[point+1].accelerations[joint];
+      joint_state.velocity = goal.trajectory.points[point+1].velocities[joint];
+      joint_state.acceleration = goal.trajectory.points[point+1].accelerations[joint];
 
       goal_joint_states.push_back(joint_state);
     }
@@ -154,11 +149,6 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
 
   double waypoint_start_time = 0;
   std::vector<trackjoint::JointTrajectory> output_trajectories(kNumDof);
-
-  // Start timer for performance benchmarking
-  using namespace std::chrono;
-  high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  size_t total_num_waypoints = 0;
 
   // Step through the saved waypoints and smooth them with TrackJoint
   for (std::size_t point=0; point<trackjt_desired_durations.size(); ++point)
@@ -214,8 +204,6 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
     std_msgs::Float64MultiArray new_accelerations;
     new_accelerations.data.resize(kNumDof);
 
-    total_num_waypoints += output_trajectories.at(0).elapsed_times.size();
-
     for (std::size_t smoothed_pt = 0; smoothed_pt<output_trajectories.at(0).elapsed_times.size(); ++smoothed_pt)
     {
       for (std::size_t joint = 0; joint<kNumDof; ++joint)
@@ -228,20 +216,14 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
       new_point.positions = new_positions.data;
       new_point.velocities = new_velocities.data;
       new_point.accelerations = new_accelerations.data;
-      new_point.time_from_start = ros::Duration(waypoint_start_time + output_trajectories.at(0).elapsed_times(smoothed_pt));
+      waypoint_start_time += kTimestep;
+      new_point.time_from_start = ros::Duration(waypoint_start_time);
       smoothed_goal.trajectory.points.push_back(new_point);
     }
-    waypoint_start_time = new_point.time_from_start.toSec() + kTimestep;
 
     // Save to file, for debugging
-//    traj_gen.saveTrajectoriesToFile(output_trajectories, "/home/andyz/Documents/" + std::to_string(point) + "_");
+    traj_gen.saveTrajectoriesToFile(output_trajectories, "/home/andyz/Documents/" + std::to_string(point) + "_");
   }
-
-  // A timer for benchmarking
-  high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  ROS_INFO_STREAM("Trackjoint smoothing took " << time_span.count() << " seconds!");
-  ROS_INFO_STREAM("Total number of waypoints " << total_num_waypoints);
 
   ////////////////
   // Send the goal
