@@ -71,16 +71,17 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   // Smooth the trajectory with TrackJoint
   ////////////////////////////////////////
   constexpr int kNumDof = 6;
-  constexpr double kMaxDuration = 30;
-  constexpr double kTimestep = 0.0039;  // Slightly faster than 250 Hz
-  constexpr double kPositionTolerance = 1e-6;
+  constexpr double kMaxDuration = 5;
+  constexpr double kTimestep = 0.001;
+  // TODO(andyz): this is pretty large. It helps (temporarily) skip noisy derivative calcs at the first waypoint
+  constexpr double kPositionTolerance = 0.2;  // radians
   constexpr bool kUseHighSpeedMode = false;
 
   std::vector<trackjoint::Limits> limits(kNumDof);
   trackjoint::Limits single_joint_limits;
   single_joint_limits.velocity_limit = 3.15;  // To match value in joint_limits.yaml
   single_joint_limits.acceleration_limit = 5;
-  single_joint_limits.jerk_limit = 10000;
+  single_joint_limits.jerk_limit = 20000;
   limits[0] = single_joint_limits;
   limits[1] = single_joint_limits;
   limits[2] = single_joint_limits;
@@ -113,7 +114,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
       // Save the start state of the robot
       joint_state.position = goal.trajectory.points[point].positions[joint];
       joint_state.velocity = goal.trajectory.points[point].velocities[joint];
-      joint_state.acceleration = goal.trajectory.points[point].accelerations[joint];
+      joint_state.acceleration = 0; //goal.trajectory.points[point].accelerations[joint];
 
       current_joint_states.push_back(joint_state);
 
@@ -127,7 +128,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
     trackjt_current_joint_states.push_back(current_joint_states);
     trackjt_goal_joint_states.push_back(goal_joint_states);
 
-    trackjt_desired_durations.push_back( goal.trajectory.points[point+1].time_from_start.toSec() - goal.trajectory.points[point].time_from_start.toSec() );
+    trackjt_desired_durations.push_back((goal.trajectory.points[point+1].time_from_start.toSec() - goal.trajectory.points[point].time_from_start.toSec() ));
   }
 
   ROS_WARN_STREAM("MoveIt's original num. waypoints: " << trackjt_desired_durations.size());
