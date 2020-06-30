@@ -72,9 +72,9 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   ////////////////////////////////////////
   constexpr int kNumDof = 6;
   constexpr double kMaxDuration = 5;
-  constexpr double kTimestep = 0.001;
+  constexpr double kTimestep = 0.004;
   // TODO(andyz): this is pretty large. It helps (temporarily) skip noisy derivative calcs at the first waypoint
-  constexpr double kPositionTolerance = 0.2;  // radians
+  constexpr double kPositionTolerance = 0.02;  // radians
   constexpr bool kUseHighSpeedMode = false;
 
   std::vector<trackjoint::Limits> limits(kNumDof);
@@ -114,7 +114,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
       // Save the start state of the robot
       joint_state.position = goal.trajectory.points[point].positions[joint];
       joint_state.velocity = goal.trajectory.points[point].velocities[joint];
-      joint_state.acceleration = 0; //goal.trajectory.points[point].accelerations[joint];
+      joint_state.acceleration = goal.trajectory.points[point].accelerations[joint];
 
       current_joint_states.push_back(joint_state);
 
