@@ -42,6 +42,8 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <trackjoint/trajectory_generator.h>
 
+#include <chrono>
+
 using namespace moveit::core;
 static const std::string LOGNAME("SimpleControllerManager");
 
@@ -159,10 +161,15 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
                                         trackjt_goal_joint_states[point], limits, kPositionTolerance,
                                         kUseHighSpeedMode);
 
+    auto start = std::chrono::system_clock::now();
     error_code = traj_gen.generateTrajectories(&output_trajectories);
-
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "Runtime: " << elapsed_seconds.count() << std::endl;
+    std::cout << "Num. waypoints: " << output_trajectories.at(0).positions.size() << std::endl;
     std::cout << "Error code: " << trackjoint::kErrorCodeMap.at(error_code)
           << std::endl;
+
     // Debug output, if failure
     if (error_code != trackjoint::ErrorCodeEnum::kNoError)
     {
