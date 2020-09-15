@@ -148,7 +148,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
   smoothed_goal.trajectory.header = goal.trajectory.header;
   smoothed_goal.trajectory.joint_names = goal.trajectory.joint_names;
 
-  trackjoint::ErrorCodeEnum error_code = trackjoint::ErrorCodeEnum::kNoError;
+  trackjoint::ErrorCodeEnum error_code = trackjoint::ErrorCodeEnum::NO_ERROR;
 
   double waypoint_start_time = 0;
   std::vector<trackjoint::JointTrajectory> output_trajectories(kNumDof);
@@ -167,11 +167,11 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << "Runtime: " << elapsed_seconds.count() << std::endl;
     std::cout << "Num. waypoints: " << output_trajectories.at(0).positions.size() << std::endl;
-    std::cout << "Error code: " << trackjoint::kErrorCodeMap.at(error_code)
+    std::cout << "Error code: " << trackjoint::ERROR_CODE_MAP.at(error_code)
           << std::endl;
 
     // Debug output, if failure
-    if (error_code != trackjoint::ErrorCodeEnum::kNoError)
+    if (error_code != trackjoint::ErrorCodeEnum::NO_ERROR)
     {
       std::cout << "===" << std::endl;
       std::cout << "Failing conditions: " << std::endl;
