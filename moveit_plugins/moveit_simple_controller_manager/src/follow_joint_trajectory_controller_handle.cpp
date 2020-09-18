@@ -160,6 +160,10 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::Ro
                                         kMaxDuration, trackjt_current_joint_states[point],
                                         trackjt_goal_joint_states[point], limits, kPositionTolerance,
                                         kUseHighSpeedMode);
+    traj_gen.reset(kTimestep, trackjt_desired_durations[point],
+                   kMaxDuration, trackjt_current_joint_states[point],
+                   trackjt_goal_joint_states[point], limits, kPositionTolerance,
+                   kUseHighSpeedMode);
 
     auto start = std::chrono::system_clock::now();
     error_code = traj_gen.generateTrajectories(&output_trajectories);
