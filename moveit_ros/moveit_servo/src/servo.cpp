@@ -53,13 +53,9 @@ Servo::Servo(ros::NodeHandle& nh, const planning_scene_monitor::PlanningSceneMon
   if (!readParameters())
     exit(EXIT_FAILURE);
 
-  joint_state_subscriber_ = std::make_shared<JointStateSubscriber>(nh_, parameters_.joint_topic);
+  servo_calcs_ = std::make_unique<ServoCalcs>(nh_, parameters_, planning_scene_monitor_, parameter_ns_);
 
-  servo_calcs_ =
-      std::make_unique<ServoCalcs>(nh_, parameters_, planning_scene_monitor_, joint_state_subscriber_, parameter_ns_);
-
-  collision_checker_ =
-      std::make_unique<CollisionCheck>(nh_, parameters_, planning_scene_monitor_, joint_state_subscriber_);
+  collision_checker_ = std::make_unique<CollisionCheck>(nh_, parameters_, planning_scene_monitor_);
 }
 
 // Read ROS parameters, typically from YAML file
@@ -322,11 +318,6 @@ bool Servo::getEEFrameTransform(geometry_msgs::TransformStamped& transform)
 const ServoParameters& Servo::getParameters() const
 {
   return parameters_;
-}
-
-sensor_msgs::JointStateConstPtr Servo::getLatestJointState() const
-{
-  return joint_state_subscriber_->getLatest();
 }
 
 }  // namespace moveit_servo
